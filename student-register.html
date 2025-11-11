@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Exam Verse – Student Register</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary-blue: #1a73e8; --error-red: #dc3545; --success-green: #28a745;
+      --light-bg: #ffffff; --dark-bg: #181818; --dark-gray: #2a2a2a;
+      --transition: all 0.3s ease;
+    }
+    body { font-family: 'Poppins', sans-serif; background: var(--light-bg); color: #333; min-height: 100vh; }
+    body.dark { background: var(--dark-bg); color: #fff; }
+    .register-page { min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+    
+    /* PERFECT TOGGLE SPACING & VISIBILITY */
+    .theme-toggle {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      width: 52px; height: 52px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      transition: var(--transition);
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .theme-toggle:hover {
+      background: rgba(26,115,232,0.2);
+      transform: scale(1.05);
+    }
+    body.dark .theme-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .theme-icon {
+      width: 28px; height: 28px;
+      position: absolute;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--primary-blue);
+    }
+    .sun-icon { opacity: 1; transform: rotate(0deg); }
+    body.dark .sun-icon { opacity: 0; transform: rotate(180deg); }
+    .moon-icon { opacity: 0; transform: rotate(-180deg); }
+    body.dark .moon-icon { opacity: 1; transform: rotate(0deg); }
+
+    .register-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 20px 40px; }
+    .register-card { width: 100%; max-width: 480px; padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); animation: slideUp 0.6s ease-out; }
+    body.dark .register-card { box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+    .register-card h2 { text-align: center; color: var(--primary-blue); font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+    .version-capsule { display: block; width: fit-content; margin: 0 auto 24px; padding: 6px 16px; background: rgba(26,115,232,0.1); color: var(--primary-blue); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 50px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .form-group label { font-weight: 500; font-size: 14px; }
+    .form-group input, .form-group select { padding: 14px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 16px; transition: var(--transition); }
+    body.dark .form-group input, body.dark .form-group select { background: var(--dark-gray); color: #fff; border-color: rgba(255,255,255,0.1); }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .register-btn { width: 100%; padding: 16px; background: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 8px; }
+    .register-btn:hover:not(:disabled) { background: #1557b0; transform: translateY(-2px); }
+    .register-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .footer { text-align: center; padding: 24px 0; margin-top: auto; border-top: 1px solid rgba(0,0,0,0.1); }
+    body.dark .footer { border-top-color: rgba(255,255,255,0.1); }
+    .footer a { color: var(--primary-blue); text-decoration: none; font-weight: 500; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--light-bg); padding: 32px; border-radius: 16px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; animation: slideUpModal 0.4s ease-out; }
+    body.dark .modal { background: var(--dark-gray); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUpModal { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header h3 { color: var(--primary-blue); font-size: 22px; margin-bottom: 8px; }
+    .modal-header p { font-size: 14px; opacity: 0.7; line-height: 1.6; }
+    .info-row { background: rgba(0,0,0,0.05); border-radius: 8px; padding: 12px; margin: 16px 0; text-align: left; }
+    body.dark .info-row { background: rgba(255,255,255,0.1); }
+    .btn-close { width: 100%; background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 16px; }
+    .btn-close:hover { background: #1557b0; transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+  <div class="register-page">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+      <svg class="theme-icon sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="theme-icon moon-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+   
+    <main class="register-main">
+      <div class="register-card">
+        <h2>Register Into Exam Verse As Student</h2>
+        <span class="version-capsule">Version 1.0</span>
+       
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="rollNumber">Roll Number *</label>
+            <input type="text" id="rollNumber" required autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" required autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" required autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone *</label>
+            <input type="tel" id="phone" required autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="year">Year of Study *</label>
+            <select id="year" required>
+              <option value="">Select Year</option>
+              <option value="1">1st Year</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="password">Password *</label>
+            <input type="password" id="password" required autocomplete="new-password" />
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password *</label>
+            <input type="password" id="confirmPassword" required autocomplete="new-password" />
+          </div>
+          <button type="submit" class="register-btn" id="registerBtn">Register</button>
+        </form>
+      </div>
+    </main>
+   
+    <footer class="footer">
+      <p>Designed & Developed by <a href="https://www.project-k.co.in" target="_blank">Project K</a></p>
+    </footer>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal-overlay" id="successModal" onclick="closeModal('successModal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Registration Successful!</h3>
+        <p>You Name<br><span id="successName" style="font-weight:600;"></span><br>
+           Roll Number<br><span id="successRoll" style="font-weight:600;"></span><br><br>
+           Site is going under building/maintenance.<br>Our Team Will Reach Out
+        </p>
+      </div>
+      <button class="btn-close" onclick="closeModal('successModal')">Close</button>
+    </div>
+  </div>
+
+  <!-- ERROR MODAL -->
+  <div class="modal-overlay" id="errorModal" onclick="closeModal('errorModal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 style="color: var(--error-red);">Registration Failed</h3>
+      </div>
+      <div class="info-row" id="errorInfo" style="background: rgba(220,53,69,0.1); text-align: left;"></div>
+      <button class="btn-close" onclick="closeModal('errorModal')">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLFMsf7KFhZLXwnlE4xwDIMjjgJinin6M8qFc5zOA87eKItaXQyJnL_IAygkzqQJkP/exec';
+    let isDark = localStorage.getItem('theme') === 'dark';
+    if (isDark) document.body.classList.add('dark');
+
+    function toggleTheme() {
+      isDark = !isDark;
+      document.body.classList.toggle('dark', isDark);
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    function showSuccess(name, roll) {
+      document.getElementById('successName').textContent = name;
+      document.getElementById('successRoll').textContent = roll;
+      document.getElementById('successModal').classList.add('show');
+    }
+
+    function showError(message) {
+      document.getElementById('errorInfo').innerHTML = message;
+      document.getElementById('errorModal').classList.add('show');
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = {
+        rollNumber: document.getElementById('rollNumber').value.trim(),
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        year: document.getElementById('year').value,
+        password: document.getElementById('password').value,
+        confirmPassword: document.getElementById('confirmPassword').value
+      };
+
+      let errors = [];
+      if (!data.rollNumber) errors.push("• Roll Number is required.");
+      if (!data.name) errors.push("• Full Name is required.");
+      if (!data.email.includes('@')) errors.push("• Valid Email is required.");
+      if (!/^\+?\d{10,15}$/.test(data.phone)) errors.push("• Valid Phone (10-15 digits) is required.");
+      if (!data.year) errors.push("• Year of Study is required.");
+      if (data.password.length < 6) errors.push("• Password must be at least 6 characters.");
+      if (data.password !== data.confirmPassword) errors.push("• Passwords do not match.");
+
+      if (errors.length > 0) {
+        showError(errors.join('<br>'));
+        return;
+      }
+
+      const btn = document.getElementById('registerBtn');
+      btn.disabled = true; btn.textContent = 'Registering...';
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'studentRegister', ...data })
+        });
+        const result = await res.json();
+        if (result.success) {
+          showSuccess(data.name, data.rollNumber);
+          document.getElementById('registerForm').reset();
+        } else {
+          showError(`• ${result.message}`);
+        }
+      } catch {
+        showError('• Network error. Try again.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Register';
+      }
+    });
+  </script>
+</body>
+</html>
