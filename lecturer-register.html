@@ -59,9 +59,9 @@
     .version-capsule { display: block; width: fit-content; margin: 0 auto 24px; padding: 6px 16px; background: rgba(26,115,232,0.1); color: var(--primary-blue); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 50px; }
     .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
     .form-group label { font-weight: 500; font-size: 14px; }
-    .form-group input { padding: 14px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 16px; transition: var(--transition); }
-    body.dark .form-group input { background: var(--dark-gray); color: #fff; border-color: rgba(255,255,255,0.1); }
-    .form-group input:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .form-group input, .form-group select { padding: 14px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 16px; transition: var(--transition); }
+    body.dark .form-group input, body.dark .form-group select { background: var(--dark-gray); color: #fff; border-color: rgba(255,255,255,0.1); }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
     .register-btn { width: 100%; padding: 16px; background: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 8px; }
     .register-btn:hover:not(:disabled) { background: #1557b0; transform: translateY(-2px); }
     .register-btn:disabled { background: #ccc; cursor: not-allowed; }
@@ -69,32 +69,37 @@
     body.dark .footer { border-top-color: rgba(255,255,255,0.1); }
     .footer a { color: var(--primary-blue); text-decoration: none; font-weight: 500; }
     .selected-items { min-height: 48px; padding: 8px 12px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; background: var(--light-bg); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
-    body.dark .selected-items { background: var(--dark-gray); border-color: rgba(255,255,255,0.1); }
+    body.dark .selected-items { background: var(--dark-gray); border-color: rgba(255,255,255,0.1); color: #fff; }
     .selected-items .placeholder { color: #999; font-style: italic; }
+    body.dark .selected-items .placeholder { color: #aaa; }
     .selected-items .tag { background: var(--primary-blue); color: white; padding: 4px 10px; border-radius: 50px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
     .selected-items .tag .remove { cursor: pointer; font-weight: bold; }
-    .open-modal-btn { margin-top: 8px; background: transparent; border: 1px solid var(--primary-blue); color: var(--primary-blue); padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+    .open-modal-btn { margin-top: 8px; background: transparent; border: 1px solid var(--primary-blue); color: var(--primary-blue); padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; transition: var(--transition); }
     .open-modal-btn:hover { background: rgba(26,115,232,0.1); }
+    body.dark .open-modal-btn { color: var(--primary-blue); border-color: var(--primary-blue); }
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
     .modal-overlay.show { display: flex; }
-    .modal { background: var(--light-bg); padding: 32px; border-radius: 16px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; animation: slideUpModal 0.4s ease-out; }
-    body.dark .modal { background: var(--dark-gray); }
+    .modal { background: var(--light-bg); padding: 32px; border-radius: 16px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; animation: slideUpModal 0.4s ease-out; max-height: 80vh; overflow-y: auto; }
+    body.dark .modal { background: var(--dark-gray); color: #fff; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUpModal { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-header h3 { color: var(--primary-blue); font-size: 22px; margin-bottom: 8px; }
-    .modal-header p { font-size: 14px; opacity: 0.7; line-height: 1.6; }
-    .info-row { background: rgba(0,0,0,0.05); border-radius: 8px; padding: 12px; margin: 16px 0; text-align: left; }
-    body.dark .info-row { background: rgba(255,255,255,0.1); }
-    .btn-close { width: 100%; background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 16px; }
-    .btn-close:hover { background: #1557b0; transform: translateY(-1px); }
-    .search-box input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    body.dark .search-box input { background: #333; border-color: #555; color: #fff; }
-    .subject-list { max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 8px; }
-    body.dark .subject-list { border-color: #444; background: #222; }
-    .subject-item { padding: 10px; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 10px; }
+    .modal h3 { color: var(--primary-blue); font-size: 22px; margin-bottom: 16px; }
+    .search-box { margin-bottom: 16px; }
+    .search-box input { width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 14px; background: var(--light-bg); }
+    body.dark .search-box input { background: var(--dark-gray); border-color: rgba(255,255,255,0.1); color: #fff; }
+    .subject-list { max-height: 300px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 8px; background: var(--light-bg); }
+    body.dark .subject-list { border-color: rgba(255,255,255,0.1); background: var(--dark-gray); }
+    .subject-item { padding: 10px; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 10px; transition: var(--transition); }
     .subject-item:hover { background: rgba(26,115,232,0.1); }
+    body.dark .subject-item:hover { background: rgba(26,115,232,0.2); }
     .subject-item input[type="checkbox"] { transform: scale(1.2); }
     .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+    .modal-actions .btn-close { width: auto; padding: 8px 16px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .modal-actions .btn-close:hover { background: #1557b0; transform: translateY(-1px); }
+    .modal-actions .btn-cancel { background: #6c757d; }
+    .modal-actions .btn-cancel:hover { background: #5a6268; }
+    .info-row { background: rgba(0,0,0,0.05); border-radius: 8px; padding: 12px; margin: 16px 0; text-align: left; }
+    body.dark .info-row { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
@@ -127,17 +132,18 @@
             <input type="email" id="email" required autocomplete="off" />
           </div>
           <div class="form-group">
-            <label for="phone">Phone *</label>
-            <input type="tel" id="phone" required autocomplete="off" />
+            <label for="phone">Phone (Optional)</label>
+            <input type="tel" id="phone" autocomplete="off" />
           </div>
           <div class="form-group">
-            <label>Teaching Subjects *</label>
+            <label>Teaching Subjects * (Select at least 2)</label>
             <div id="selectedSubjects" class="selected-items">
               <span class="placeholder">Click to select subjects</span>
             </div>
             <button type="button" class="open-modal-btn" onclick="openSubjectModal()">Select Subjects</button>
-            <input type="hidden" id="subject" required />
+            <input type="hidden" id="subjects" required />
           </div>
+          <input type="hidden" id="role" value="Lecturer" />
           <div class="form-group">
             <label for="password">Password *</label>
             <input type="password" id="password" required autocomplete="new-password" />
@@ -165,8 +171,8 @@
       </div>
       <div class="subject-list" id="subjectList"></div>
       <div class="modal-actions">
-        <button class="btn-close" onclick="closeSubjectModal()">Cancel</button>
-        <button class="btn-close" style="background:#28a745;" onclick="confirmSubjects()">Done</button>
+        <button class="btn-close btn-cancel" onclick="closeSubjectModal()">Cancel</button>
+        <button class="btn-close" onclick="confirmSubjects()">Done</button>
       </div>
     </div>
   </div>
@@ -176,10 +182,8 @@
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3>Registration Successful!</h3>
-        <p id="successMessage">You Name<br><span id="successName" style="font-weight:600;"></span><br>
-           Email<br><span id="successEmail" style="font-weight:600;"></span><br><br>
-           Site is going under building/maintenance.<br>Our Team Will Reach Out
-        </p>
+        <p id="successMessage"></p>
+        <small>MFA will be enabled post-approval.</small>
       </div>
       <button class="btn-close" onclick="closeModal('successModal')">Close</button>
     </div>
@@ -201,7 +205,7 @@
     let isDark = localStorage.getItem('theme') === 'dark';
     if (isDark) document.body.classList.add('dark');
     let selectedSubjectList = [];
-    const SUBJECTS = [];
+    let SUBJECTS = [];
 
     function toggleTheme() {
       isDark = !isDark;
@@ -213,15 +217,12 @@
       document.getElementById(id).classList.remove('show');
     }
 
-    function showSuccess(name, email, lecturerId = '') {
-      document.getElementById('successName').textContent = name;
-      document.getElementById('successEmail').textContent = email;
-      let msg = `You Name<br><span style="font-weight:600;">${name}</span><br>
-                 Email<br><span style="font-weight:600;">${email}</span><br><br>`;
-      if (lecturerId) {
-        msg += `Lecturer ID<br><span style="font-weight:600;">${lecturerId}</span><br><br>`;
-      }
-      msg += `Site is going under building/maintenance.<br>Our Team Will Reach Out`;
+    function showSuccess(name, email, lecturerId) {
+      let msg = `Name<br><span style="font-weight:600;">${name}</span><br>
+                 Email<br><span style="font-weight:600;">${email}</span><br>
+                 Lecturer ID<br><span style="font-weight:600;">${lecturerId}</span><br>
+                 Subjects<br><span style="font-weight:600;">${selectedSubjectList.join(', ')}</span><br><br>
+                 Site is under maintenance.<br>Team will reach out for approval.`;
       document.getElementById('successMessage').innerHTML = msg;
       document.getElementById('successModal').classList.add('show');
     }
@@ -236,22 +237,28 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'getSubjects' })
         });
         const data = await res.json();
-        if (data.success) SUBJECTS.push(...data.subjects);
-      } catch (e) { console.error(e); }
+        if (data.success) {
+          SUBJECTS = data.subjects;
+        }
+      } catch (e) { 
+        console.error('Failed to fetch subjects:', e);
+        SUBJECTS = ['C Programming', 'Data Structures', 'DBMS', 'OS', 'Computer Networks']; // Fallback
+      }
     }
 
     function openSubjectModal() {
-      fetchSubjects().then(() => {
-        document.getElementById('subjectModal').classList.add('show');
-        renderSubjectList();
-      });
+      if (SUBJECTS.length === 0) fetchSubjects();
+      document.getElementById('subjectModal').classList.add('show');
+      renderSubjectList();
     }
 
     function closeSubjectModal() {
       document.getElementById('subjectModal').classList.remove('show');
+      document.getElementById('subjectSearch').value = '';
     }
 
     function renderSubjectList() {
@@ -290,11 +297,11 @@
           box.innerHTML += `
             <div class="tag">
               ${s}
-              <span class="remove" onclick="removeSubject('${s}')">×</span>
+              <span class="remove" onclick="removeSubject('${s.replace(/'/g, "\\'")}')">×</span>
             </div>`;
         });
       }
-      document.getElementById('subject').value = selectedSubjectList.join(',');
+      document.getElementById('subjects').value = selectedSubjectList.join(',');
     }
 
     window.removeSubject = function (s) {
@@ -303,11 +310,13 @@
       renderSubjectList();
     };
 
-    window.filterSubjects = function () { renderSubjectList(); };
+    window.filterSubjects = function () { 
+      renderSubjectList(); 
+    };
 
     window.confirmSubjects = function () {
-      if (selectedSubjectList.length === 0) {
-        alert('Please select at least one subject.');
+      if (selectedSubjectList.length < 2) {
+        alert('Please select at least 2 subjects for lecturer role.');
         return;
       }
       closeSubjectModal();
@@ -321,16 +330,17 @@
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
-        subject: document.getElementById('subject').value.trim(),
+        subjects: document.getElementById('subjects').value.trim(),
+        role: document.getElementById('role').value,
         password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('confirmPassword').value
+        confirmPassword: document.getElementById('confirmPassword').value,
+        userAgent: navigator.userAgent
       };
 
       let errors = [];
       if (!data.name) errors.push("• Full Name is required.");
-      if (!data.email.includes('@')) errors.push("• Valid Email is required.");
-      if (!/^\+?\d{10,15}$/.test(data.phone)) errors.push("• Valid Phone (10-15 digits) is required.");
-      if (!data.subject) errors.push("• At least one subject must be selected.");
+      if (!data.email || !/^[^\s@]+@(?:svr|govpoly)\.(?:edu|ac)\.in$/.test(data.email)) errors.push("• Valid official email (e.g., @svr.ac.in or @govpoly.ac.in) is required.");
+      if (!data.subjects || selectedSubjectList.length < 2) errors.push("• At least 2 subjects must be selected.");
       if (data.password.length < 6) errors.push("• Password must be at least 6 characters.");
       if (data.password !== data.confirmPassword) errors.push("• Passwords do not match.");
 
@@ -344,19 +354,20 @@
 
       try {
         const res = await fetch(SCRIPT_URL, { 
-          method: 'POST', 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'lecturerRegister', ...data }) 
         });
         const result = await res.json();
         if (result.success) {
-          showSuccess(data.name, data.email, result.lecturerId || '');
+          showSuccess(data.name, data.email, result.lecturerId);
           document.getElementById('registerForm').reset();
           selectedSubjectList = [];
           updateSelectedDisplay();
         } else {
           showError(`• ${result.message}`);
         }
-      } catch {
+      } catch (err) {
         showError('• Network error. Try again.');
       } finally {
         btn.disabled = false; btn.textContent = 'Register';
