@@ -62,6 +62,8 @@
     .form-group input, .form-group select { padding: 14px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 16px; transition: var(--transition); }
     body.dark .form-group input, body.dark .form-group select { background: var(--dark-gray); color: #fff; border-color: rgba(255,255,255,0.1); }
     .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .form-group.fixed { background: rgba(26,115,232,0.1); padding: 14px 16px; border-radius: 8px; border: 2px solid var(--primary-blue); }
+    body.dark .form-group.fixed { background: rgba(26,115,232,0.2); }
     .register-btn { width: 100%; padding: 16px; background: var(--primary-blue); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 8px; }
     .register-btn:hover:not(:disabled) { background: #1557b0; transform: translateY(-2px); }
     .register-btn:disabled { background: #ccc; cursor: not-allowed; }
@@ -133,27 +135,23 @@
             <select id="semester" required>
               <option value="">Select Semester</option>
               <option value="1">1st Sem</option>
-              <option value="2">2nd Sem</option>
               <option value="3">3rd Sem</option>
               <option value="4">4th Sem</option>
               <option value="5">5th Sem</option>
-              <option value="6">6th Sem</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="department">Department *</label>
-            <select id="department" required>
-              <option value="">Select Department</option>
-              <option value="Computer Engineering">Computer Engineering</option>
-              <option value="Mechanical Engineering">Mechanical Engineering</option>
-              <option value="Electrical Engineering">Electrical Engineering</option>
-              <option value="Civil Engineering">Civil Engineering</option>
-              <option value="Other">Other</option>
-            </select>
+          <div class="form-group fixed">
+            <label>Department</label>
+            <p style="font-weight: 500; color: var(--primary-blue); margin: 0;">Computer Engineering</p>
+            <input type="hidden" id="department" value="Computer Engineering" />
           </div>
           <div class="form-group">
             <label for="college">College *</label>
-            <input type="text" id="college" required autocomplete="off" />
+            <select id="college" required>
+              <option value="">Select College</option>
+              <option value="Government Polytechnic Proddatur">Government Polytechnic Proddatur</option>
+              <option value="SVR Engineering College Nandyal">SVR Engineering College Nandyal</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="password">Password *</label>
@@ -239,8 +237,8 @@
         phone: document.getElementById('phone').value.trim(),
         year: document.getElementById('year').value,
         semester: document.getElementById('semester').value,
-        department: document.getElementById('department').value,
-        college: document.getElementById('college').value.trim(),
+        department: 'Computer Engineering',  // Fixed value
+        college: document.getElementById('college').value,
         password: document.getElementById('password').value,
         confirmPassword: document.getElementById('confirmPassword').value,
         userAgent: navigator.userAgent  // Pass for logging
@@ -252,9 +250,8 @@
       if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.push("• Valid Email is required.");
       if (!data.phone || !/^\+?\d{10,15}$/.test(data.phone)) errors.push("• Valid Phone (10-15 digits) is required.");
       if (!data.year) errors.push("• Year of Study is required.");
-      if (!data.semester) errors.push("• Semester is required.");
-      if (!data.department) errors.push("• Department is required.");
-      if (!data.college) errors.push("• College is required.");
+      if (!data.semester || ![1,3,4,5].includes(parseInt(data.semester))) errors.push("• Valid Semester is required.");
+      if (!data.college || !['Government Polytechnic Proddatur', 'SVR Engineering College Nandyal'].includes(data.college)) errors.push("• Valid College is required.");
       if (data.password.length < 6) errors.push("• Password must be at least 6 characters.");
       if (data.password !== data.confirmPassword) errors.push("• Passwords do not match.");
 
