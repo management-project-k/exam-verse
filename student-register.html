@@ -129,6 +129,33 @@
             </select>
           </div>
           <div class="form-group">
+            <label for="semester">Semester *</label>
+            <select id="semester" required>
+              <option value="">Select Semester</option>
+              <option value="1">1st Sem</option>
+              <option value="2">2nd Sem</option>
+              <option value="3">3rd Sem</option>
+              <option value="4">4th Sem</option>
+              <option value="5">5th Sem</option>
+              <option value="6">6th Sem</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="department">Department *</label>
+            <select id="department" required>
+              <option value="">Select Department</option>
+              <option value="Computer Engineering">Computer Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="college">College *</label>
+            <input type="text" id="college" required autocomplete="off" />
+          </div>
+          <div class="form-group">
             <label for="password">Password *</label>
             <input type="password" id="password" required autocomplete="new-password" />
           </div>
@@ -152,8 +179,11 @@
       <div class="modal-header">
         <h3>Registration Successful!</h3>
         <p>You Name<br><span id="successName" style="font-weight:600;"></span><br>
-           Roll Number<br><span id="successRoll" style="font-weight:600;"></span><br><br>
-           Site is going under building/maintenance.<br>Our Team Will Reach Out
+           Roll Number<br><span id="successRoll" style="font-weight:600;"></span><br>
+           Semester<br><span id="successSemester" style="font-weight:600;"></span><br>
+           Department<br><span id="successDepartment" style="font-weight:600;"></span><br>
+           College<br><span id="successCollege" style="font-weight:600;"></span><br><br>
+           Site is going under building/maintenance.<br>Our Team Will Reach Out.<br><small>Your activity has been logged for security.</small>
         </p>
       </div>
       <button class="btn-close" onclick="closeModal('successModal')">Close</button>
@@ -186,9 +216,12 @@
       document.getElementById(id).classList.remove('show');
     }
 
-    function showSuccess(name, roll) {
+    function showSuccess(name, roll, semester, department, college) {
       document.getElementById('successName').textContent = name;
       document.getElementById('successRoll').textContent = roll;
+      document.getElementById('successSemester').textContent = semester;
+      document.getElementById('successDepartment').textContent = department;
+      document.getElementById('successCollege').textContent = college;
       document.getElementById('successModal').classList.add('show');
     }
 
@@ -205,16 +238,23 @@
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
         year: document.getElementById('year').value,
+        semester: document.getElementById('semester').value,
+        department: document.getElementById('department').value,
+        college: document.getElementById('college').value.trim(),
         password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('confirmPassword').value
+        confirmPassword: document.getElementById('confirmPassword').value,
+        userAgent: navigator.userAgent  // Pass for logging
       };
 
       let errors = [];
       if (!data.rollNumber) errors.push("• Roll Number is required.");
       if (!data.name) errors.push("• Full Name is required.");
-      if (!data.email.includes('@')) errors.push("• Valid Email is required.");
-      if (!/^\+?\d{10,15}$/.test(data.phone)) errors.push("• Valid Phone (10-15 digits) is required.");
+      if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.push("• Valid Email is required.");
+      if (!data.phone || !/^\+?\d{10,15}$/.test(data.phone)) errors.push("• Valid Phone (10-15 digits) is required.");
       if (!data.year) errors.push("• Year of Study is required.");
+      if (!data.semester) errors.push("• Semester is required.");
+      if (!data.department) errors.push("• Department is required.");
+      if (!data.college) errors.push("• College is required.");
       if (data.password.length < 6) errors.push("• Password must be at least 6 characters.");
       if (data.password !== data.confirmPassword) errors.push("• Passwords do not match.");
 
@@ -229,11 +269,12 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'studentRegister', ...data })
         });
         const result = await res.json();
         if (result.success) {
-          showSuccess(data.name, data.rollNumber);
+          showSuccess(data.name, data.rollNumber, data.semester + ' Sem', data.department, data.college);
           document.getElementById('registerForm').reset();
         } else {
           showError(`• ${result.message}`);
