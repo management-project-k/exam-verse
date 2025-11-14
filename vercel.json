@@ -22,7 +22,7 @@
   ],
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "node@18.x"
     }
   }
 }
