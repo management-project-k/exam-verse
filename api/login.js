@@ -1,5 +1,6 @@
 // api/login.js
 import mysql from 'mysql2/promise';
+import crypto from 'crypto';
 
 const pool = mysql.createPool({
   host: 'rshqto.h.filess.io',
@@ -10,7 +11,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 10000,
+  connectTimeout: 15000,
   ssl: {
     rejectUnauthorized: false
   }
@@ -30,7 +31,7 @@ export default async function handler(req, res) {
   let connection;
   try {
     connection = await pool.getConnection();
-    
+
     const [rows] = await connection.execute(
       'SELECT RollNumber, Name, Email, Password, Year, Semester, Department FROM Students WHERE RollNumber = ? AND Status = "active"',
       [rollNumber]
@@ -41,7 +42,6 @@ export default async function handler(req, res) {
     }
 
     const user = rows[0];
-    const crypto = require('crypto');
     const inputHash = crypto.createHash('sha256').update(password).digest('hex').toUpperCase();
 
     if (inputHash !== user.Password) {
