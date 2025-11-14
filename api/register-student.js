@@ -1,29 +1,23 @@
 // api/register-student.js
-import { createClient } from '@libsql/client/http';
+import { createClient } from '@libsql/client';
 import crypto from 'crypto';
 
-const url = process.env.TURSO_DATABASE_URL;
-const authToken = process.env.TURSO_AUTH_TOKEN;
-
-console.log('TURSO_URL:', url ? 'Set' : 'Missing');
-console.log('TURSO_TOKEN:', authToken ? 'Set (starts with eyJ...)' : 'Missing');
-
-if (!url || !authToken) {
-  console.error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN');
-}
-
-const client = createClient({
-  url,
-  authToken,
-});
-
 export default async function handler(req, res) {
-  if (!url || !authToken) {
-    return res.status(500).json({ success: false, message: 'Server configuration error. Contact admin.' });
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
-
+  
   if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, message: 'Method not allowed' });
+    return res.status(405).json({ 
+      success: false, 
+      message: 'Method not allowed' 
+    });
   }
 
   const {
@@ -36,85 +30,286 @@ export default async function handler(req, res) {
     department,
     college,
     password,
-    confirmPassword,
+    confirmPassword
   } = req.body;
 
+  // Validation
   const errors = [];
-  if (!rollNumber) errors.push('Roll Number is required.');
-  if (!name) errors.push('Full Name is required.');
-  if (!email || !/^[^\s@]+@(?:svr|govpoly)\.(?:edu|ac)\.in$/.test(email)) {
-    errors.push('Official email (@svr.ac.in or @govpoly.ac.in) required.');
+  
+  if (!rollNumber?.trim()) {
+    errors.push('Roll number is required');
   }
-  if (!phone || !/^\+?\d{10,12}$/.test(phone)) errors.push('Valid phone number required.');
-  if (!year || !['1', '2', '3'].includes(year)) errors.push('Valid Year of Study required.');
-  if (!semester || !['1', '3', '4', '5'].includes(semester)) errors.push('Valid Semester required.');
-  if (department !== 'Computer Engineering') errors.push('Department must be Computer Engineering.');
-  if (!college || !['Government Polytechnic Proddatur', 'SVR Engineering College Nandyal'].includes(college)) {
-    errors.push('Valid college required.');
+  
+  if (!name?.trim()) {
+    errors.push('Full name is required');
   }
-  if (!password || password.length < 6) errors.push('Password must be at least 6 characters.');
-  if (password !== confirmPassword) errors.push('Passwords do not match.');
+  
+  if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.push('Valid email is required');
+  }
+  
+  if (!phone?.trim() || !/^[0-9]{10}$/.test(phone)) {
+    errors.push('Valid 10-digit phone number is required');
+  }
+  
+  if (!year || year < 1 || year > 3) {
+    errors.push('Valid year (1-3) is required');
+  }
+  
+  if (!semester || semester < 1 || semester > 6) {
+    errors.push('Valid semester (1-6) is required');
+  }
+  
+  if (!department?.trim()) {
+    errors.push('Department is required');
+  }
+  
+  if (!college?.trim()) {
+    errors.push('College is required');
+  }
+  
+  if (!password || password.length < 6) {
+    errors.push('Password must be at least 6 characters');
+  }
+  
+  if (password !== confirmPassword) {
+    errors.push('Passwords do not match');
+  }
 
   if (errors.length > 0) {
-    return res.status(400).json({ success: false, message: errors.join(' ') });
+    return res.status(400).json({ 
+      success: false, 
+      message: errors.join('. ') 
+    });
   }
 
-  const hashedPassword = crypto.createHash('sha256').update(password).digest('hex').toUpperCase();
+  // Create database client
+  const client = createClient({
+    url: process.env.TURSO_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
 
   try {
-    await client.execute('SELECT 1');
-
-    const checkResult = await client.execute({
-      sql: `
-        SELECT RollNumber, Email
-        FROM Students
-        WHERE RollNumber = ? OR Email = ?
-      `,
-      args: [rollNumber, email],
+    // Enable foreign keys
+    await client.execute('PRAGMA foreign_keys = ON');
+    
+    // Check if roll number already exists
+    const existingStudent = await client.execute({
+      sql: 'SELECT RollNumber FROM Students WHERE RollNumber = ?',
+      args: [rollNumber]
     });
 
-    if (checkResult.rows.length > 0) {
-      const existing = checkResult.rows[0];
-      if (existing.RollNumber === rollNumber) {
-        return res.status(409).json({ success: false, message: 'Roll Number already registered.' });
-      }
-      if (existing.Email === email) {
-        return res.status(409).json({ success: false, message: 'Email already registered.' });
-      }
+    if (existingStudent.rows.length > 0) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'Roll number already registered' 
+      });
     }
 
-    await client.execute({
-      sql: `
-        INSERT INTO Students (
-          RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status, AccountCreated
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
-      `,
-      args: [
-        rollNumber,
-        name,
-        email,
-        phone,
-        hashedPassword,
-        parseInt(year),
-        parseInt(semester),
-        department,
-        college,
-      ],
+    // Check if email already exists
+    const existingEmail = await client.execute({
+      sql: 'SELECT Email FROM Students WHERE Email = ?',
+      args: [email]
     });
 
-    return res.status(200).json({
-      success: true,
-      message: 'Registration successful!',
-    });
+    if (existingEmail.rows.length > 0) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'Email already registered' 
+      });
+    }
+
+    // Hash password
+    const hashedPassword = crypto
+      .createHash('sha256')
+      .update(password)
+      .digest('hex')
+      .toUpperCase();
+
+    // Begin transaction
+    await client.execute('BEGIN TRANSACTION');
+
+    try {
+      // Insert student
+      await client.execute({
+        sql: `INSERT INTO Students (
+                RollNumber, 
+                Name, 
+                Email, 
+                Phone, 
+                Password, 
+                Year, 
+                Semester, 
+                Department, 
+                College, 
+                Status, 
+                AccountCreated,
+                NoOfMockTests,
+                OverallScore,
+                Rank
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP, 0, 0.0, 0)`,
+        args: [
+          rollNumber,
+          name,
+          email,
+          phone,
+          hashedPassword,
+          year,
+          semester,
+          department,
+          college
+        ]
+      });
+
+      // Create profile
+      await client.execute({
+        sql: `INSERT INTO StudentProfiles (
+                RollNumber,
+                PrivacyLevel,
+                ProfileViews,
+                FollowersCount,
+                FollowingCount,
+                PostsCount,
+                AccountType,
+                IsPrivate,
+                IsVerified
+              ) VALUES (?, 'public', 0, 0, 0, 0, 'public', FALSE, FALSE)`,
+        args: [rollNumber]
+      });
+
+      // Create default settings
+      await client.execute({
+        sql: `INSERT INTO UserSettings (
+                SettingID,
+                RollNumber,
+                ThemeMode,
+                Language,
+                NotificationsEnabled,
+                PrivacyLevel,
+                EmailNotifications
+              ) VALUES (?, ?, 'light', 'en', TRUE, 'public', TRUE)`,
+        args: [`SET_${rollNumber}`, rollNumber]
+      });
+
+      // Create notification preferences
+      await client.execute({
+        sql: `INSERT INTO NotificationPreferences (
+                PrefID,
+                RollNumber,
+                LikesEnabled,
+                CommentsEnabled,
+                MessagesEnabled,
+                GroupsEnabled,
+                TestRemindersEnabled
+              ) VALUES (?, ?, TRUE, TRUE, TRUE, TRUE, TRUE)`,
+        args: [`PREF_${rollNumber}`, rollNumber]
+      });
+
+      // Create privacy settings
+      await client.execute({
+        sql: `INSERT INTO PrivacySettings (
+                SettingID,
+                UserRoll,
+                AccountType,
+                ProfileVisibility,
+                WhoCanMessage,
+                WhoCanTag,
+                WhoCanSeeFollowers,
+                WhoCanSeePosts,
+                WhoCanSeeStories,
+                WhoCanComment,
+                ShowOnlineStatus
+              ) VALUES (?, ?, 'public', 'everyone', 'everyone', 'everyone', 
+                       'everyone', 'everyone', 'everyone', 'everyone', TRUE)`,
+        args: [`PRIV_${rollNumber}`, rollNumber]
+      });
+
+      // Log registration
+      await client.execute({
+        sql: `INSERT INTO StudentActivity (
+                ActivityID,
+                StudentRoll,
+                ActivityType,
+                Description,
+                IPAddress,
+                UserAgent
+              ) VALUES (?, ?, 'REGISTRATION', 'Account created', ?, ?)`,
+        args: [
+          `ACT_${Date.now()}`,
+          rollNumber,
+          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown',
+          req.headers['user-agent'] || 'Unknown'
+        ]
+      });
+
+      // Create notification for admin
+      await client.execute({
+        sql: `INSERT INTO Notifications (
+                NotificationID,
+                RecipientRoll,
+                Type,
+                Title,
+                Message,
+                SenderRoll
+              ) VALUES (?, 'ADMIN', 'NEW_REGISTRATION', 'New Student Registration', ?, ?)`,
+        args: [
+          `NOTIF_${Date.now()}`,
+          `New student ${name} (${rollNumber}) has registered and requires approval`,
+          rollNumber
+        ]
+      });
+
+      // Commit transaction
+      await client.execute('COMMIT');
+
+      return res.status(200).json({
+        success: true,
+        message: 'Registration successful! Your account is pending admin approval.',
+        data: {
+          rollNumber,
+          name,
+          email
+        }
+      });
+
+    } catch (transactionError) {
+      // Rollback on error
+      await client.execute('ROLLBACK');
+      throw transactionError;
+    }
+
   } catch (error) {
-    console.error('Register error:', error.message, error.stack);
-    if (error.message?.includes('401')) {
-      return res.status(500).json({ success: false, message: 'Database authentication failed. Token invalid – contact admin.' });
-    } else if (error.message?.includes('URL_INVALID')) {
-      return res.status(500).json({ success: false, message: 'Invalid database URL. Check configuration.' });
-    } else if (error.message?.includes('table Students does not exist')) {
-      return res.status(500).json({ success: false, message: 'Database schema not initialized. Contact admin.' });
+    console.error('Registration error:', error);
+    
+    // Log error
+    try {
+      await client.execute({
+        sql: `INSERT INTO ErrorLogs (
+                ErrorID,
+                ErrorType,
+                ErrorMessage,
+                ActionAttempted,
+                IPAddress,
+                RequestData
+              ) VALUES (?, 'REGISTRATION_ERROR', ?, 'Student Registration', ?, ?)`,
+        args: [
+          `ERR_${Date.now()}`,
+          error.message,
+          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown',
+          JSON.stringify({ rollNumber, email })
+        ]
+      });
+    } catch (logError) {
+      console.error('Failed to log error:', logError);
     }
-    return res.status(500).json({ success: false, message: 'Server error. Try again later.' });
+
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Server error. Please try again later.' 
+    });
+    
+  } finally {
+    // Always close the client
+    await client.close();
   }
 }
