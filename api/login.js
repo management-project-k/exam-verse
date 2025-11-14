@@ -3,16 +3,7 @@ import { createClient } from '@libsql/client';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
+  // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ 
       success: false, 
@@ -20,9 +11,10 @@ export default async function handler(req, res) {
     });
   }
 
-  const { rollNumber, password } = req.body;
-
-  // Validation
+  // Get credentials
+  const { rollNumber, password } = req.body || {};
+  
+  // Validate input
   if (!rollNumber || !password) {
     return res.status(400).json({ 
       success: false, 
@@ -30,7 +22,7 @@ export default async function handler(req, res) {
     });
   }
 
-  // Create database client
+  // Create Turso client
   const client = createClient({
     url: process.env.TURSO_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
@@ -39,46 +31,42 @@ export default async function handler(req, res) {
   try {
     // Enable foreign keys
     await client.execute('PRAGMA foreign_keys = ON');
-    
-    // Query student
-    const studentResult = await client.execute({
-      sql: `SELECT 
-              RollNumber, 
-              Name, 
-              Email, 
-              Phone,
-              Password, 
-              Year, 
-              Semester, 
-              Department,
-              College,
-              Status,
-              OverallScore,
-              Rank,
-              NoOfMockTests
+
+    // Get student record
+    const result = await client.execute({
+      sql: `SELECT RollNumber, Name, Email, Password, Year, Semester, 
+            Department, College, Status, OverallScore, Rank, NoOfMockTests
             FROM Students 
-            WHERE RollNumber = ?`,
+            WHERE RollNumber = ? AND Status != 'deleted'`,
       args: [rollNumber],
     });
 
-    if (studentResult.rows.length === 0) {
+    // Check if student exists
+    if (result.rows.length === 0) {
       return res.status(401).json({ 
         success: false, 
         message: 'Invalid roll number or password' 
       });
     }
 
-    const student = studentResult.rows[0];
+    const student = result.rows[0];
 
     // Check account status
-    if (student.Status !== 'active') {
+    if (student.Status === 'pending') {
       return res.status(403).json({ 
         success: false, 
-        message: `Account is ${student.Status}. Please contact admin.` 
+        message: 'Account pending approval. Please contact admin.' 
+      });
+    }
+    
+    if (student.Status === 'suspended') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Account suspended. Please contact admin.' 
       });
     }
 
-    // Verify password (SHA-256 hash)
+    // Verify password (SHA-256)
     const hashedInput = crypto
       .createHash('sha256')
       .update(password)
@@ -89,13 +77,13 @@ export default async function handler(req, res) {
       // Log failed attempt
       await client.execute({
         sql: `INSERT INTO SecurityLogs 
-              (SecurityID, EventType, UserRoll, IPAddress, Action, Status, RiskLevel, Details)
-              VALUES (?, 'LOGIN_FAILED', ?, ?, 'Login attempt', 'failed', 'low', 'Invalid password')`,
+              (SecurityID, EventType, UserRoll, IPAddress, Action, Status)
+              VALUES (?, 'failed_login', ?, ?, 'login_attempt', 'failed')`,
         args: [
-          `SEC_${Date.now()}`,
+          `sec_${Date.now()}`,
           rollNumber,
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown'
-        ]
+          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
+        ],
       });
 
       return res.status(401).json({ 
@@ -105,105 +93,86 @@ export default async function handler(req, res) {
     }
 
     // Create session
-    const sessionId = `SESS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    
+    const sessionId = `sess_${crypto.randomUUID()}`;
+    const ipAddress = req.headers['x-forwarded-for'] || 
+                     req.connection.remoteAddress || 
+                     'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
     await client.execute({
       sql: `INSERT INTO Sessions 
             (SessionID, RollNumber, LoginTime, Active, IPAddress, UserAgent, ExpiresAt)
-            VALUES (?, ?, CURRENT_TIMESTAMP, TRUE, ?, ?, ?)`,
-      args: [
-        sessionId,
-        student.RollNumber,
-        req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown',
-        req.headers['user-agent'] || 'Unknown',
-        expiresAt.toISOString()
-      ]
+            VALUES (?, ?, CURRENT_TIMESTAMP, 1, ?, ?, datetime('now', '+24 hours'))`,
+      args: [sessionId, student.RollNumber, ipAddress, userAgent],
     });
 
     // Update last login
     await client.execute({
-      sql: `UPDATE Students SET LastLogin = CURRENT_TIMESTAMP WHERE RollNumber = ?`,
-      args: [student.RollNumber]
+      sql: `UPDATE Students 
+            SET LastLogin = CURRENT_TIMESTAMP 
+            WHERE RollNumber = ?`,
+      args: [student.RollNumber],
     });
 
     // Log successful login
     await client.execute({
       sql: `INSERT INTO StudentActivity 
-            (ActivityID, StudentRoll, ActivityType, Description, IPAddress, UserAgent, SessionID)
-            VALUES (?, ?, 'LOGIN', 'Successful login', ?, ?, ?)`,
+            (ActivityID, StudentRoll, ActivityType, Description, IPAddress, SessionID)
+            VALUES (?, ?, 'login', 'Student logged in', ?, ?)`,
       args: [
-        `ACT_${Date.now()}`,
+        `act_${Date.now()}`,
         student.RollNumber,
-        req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown',
-        req.headers['user-agent'] || 'Unknown',
+        ipAddress,
         sessionId
-      ]
+      ],
     });
 
     // Get profile data if exists
     const profileResult = await client.execute({
-      sql: `SELECT 
-              Bio, 
-              ProfilePhotoURL, 
-              CoverPhotoURL,
-              City,
-              State,
-              FollowersCount,
-              FollowingCount,
-              PostsCount
+      sql: `SELECT Bio, ProfilePhotoURL, FollowersCount, FollowingCount, PostsCount
             FROM StudentProfiles 
             WHERE RollNumber = ?`,
-      args: [student.RollNumber]
+      args: [student.RollNumber],
     });
 
-    const profile = profileResult.rows[0] || {};
+    // Prepare response (exclude password)
+    const { Password, ...studentData } = student;
+    
+    if (profileResult.rows.length > 0) {
+      Object.assign(studentData, profileResult.rows[0]);
+    }
 
-    // Remove password from response
-    delete student.Password;
+    studentData.SessionID = sessionId;
 
-    // Prepare response
-    const responseData = {
-      ...student,
-      ...profile,
-      SessionID: sessionId
-    };
-
-    return res.status(200).json({
-      success: true,
+    res.status(200).json({ 
+      success: true, 
       message: 'Login successful',
-      data: {
-        student: responseData
-      }
+      data: { 
+        student: studentData 
+      } 
     });
 
   } catch (error) {
     console.error('Login error:', error);
     
     // Log error
-    try {
-      await client.execute({
-        sql: `INSERT INTO ErrorLogs 
-              (ErrorID, ErrorType, ErrorMessage, UserID, ActionAttempted, IPAddress)
-              VALUES (?, 'LOGIN_ERROR', ?, ?, 'Login', ?)`,
-        args: [
-          `ERR_${Date.now()}`,
-          error.message,
-          rollNumber,
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown'
-        ]
-      });
-    } catch (logError) {
-      console.error('Failed to log error:', logError);
-    }
+    await client.execute({
+      sql: `INSERT INTO ErrorLogs 
+            (ErrorID, ErrorType, ErrorMessage, UserID, ActionAttempted, IPAddress)
+            VALUES (?, 'login_error', ?, ?, 'login', ?)`,
+      args: [
+        `err_${Date.now()}`,
+        error.message || 'Unknown error',
+        rollNumber,
+        req.headers['x-forwarded-for'] || 'unknown'
+      ],
+    }).catch(console.error);
 
-    return res.status(500).json({ 
+    res.status(500).json({ 
       success: false, 
-      message: 'Server error. Please try again later.' 
+      message: 'Server error. Please try again.' 
     });
-    
   } finally {
-    // Always close the client
-    await client.close();
+    client.close();
   }
 }
