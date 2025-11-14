@@ -1,16 +1,27 @@
 // api/login.js
-import { createClient } from '@libsql/client';
+import { createClient } from '@libsql/client/http';
 import crypto from 'crypto';
-import dotenv from 'dotenv';
 
-dotenv.config();
+const url = process.env.TURSO_DATABASE_URL;
+const authToken = process.env.TURSO_AUTH_TOKEN;
+
+console.log('TURSO_URL:', url ? 'Set' : 'Missing');
+console.log('TURSO_TOKEN:', authToken ? 'Set (starts with eyJ...)' : 'Missing');
+
+if (!url || !authToken) {
+  console.error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN');
+}
 
 const client = createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
+  url,
+  authToken,
 });
 
 export default async function handler(req, res) {
+  if (!url || !authToken) {
+    return res.status(500).json({ success: false, message: 'Server configuration error. Contact admin.' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
@@ -22,13 +33,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const query = `
-      SELECT RollNumber, Name, Email, Password, Year, Semester, Department
-      FROM Students
-      WHERE RollNumber = ? AND Status = 'active'
-    `;
     const result = await client.execute({
-      sql: query,
+      sql: `
+        SELECT RollNumber, Name, Email, Password, Year, Semester, Department
+        FROM Students
+        WHERE RollNumber = ? AND Status = 'active'
+      `,
       args: [rollNumber],
     });
 
@@ -43,10 +53,8 @@ export default async function handler(req, res) {
       return res.status(401).json({ success: false, message: 'Invalid password' });
     }
 
-    // Remove password from response
     delete user.Password;
 
-    // Update LastLogin timestamp
     await client.execute({
       sql: 'UPDATE Students SET LastLogin = CURRENT_TIMESTAMP WHERE RollNumber = ?',
       args: [rollNumber],
@@ -57,7 +65,10 @@ export default async function handler(req, res) {
       data: { student: user },
     });
   } catch (error) {
-    console.error('Login DB Error:', error.message);
+    console.error('Login error:', error.message, error.stack);
+    if (error.message?.includes('401')) {
+      return res.status(500).json({ success: false, message: 'Database authentication failed. Token invalid – contact admin.' });
+    }
     return res.status(500).json({ success: false, message: 'Connection failed. Try again.' });
   }
 }
