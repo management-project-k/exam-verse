@@ -1,57 +1,63 @@
-import { createClient } from "@turso/database";
-import crypto from "crypto";
+// api/login.js
+import { createClient } from '@libsql/client';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const client = createClient({
-  url: "libsql://exam-verse-3-tfixcom.aws-ap-south-1.turso.io",
-  authToken: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NjMxMDgwNjYsImlkIjoiZjQyMzM4ODktMThiNC00ZTNhLWI0ODQtZjc1ZDlhN2E4ZTgwIiwicmlkIjoiYTYxNDI5MjktZGExZS00NDkxLTliNTQtYWIxNTRmYWEzNjU1In0.hZ-HEKLDUehJXmtlJjK0L8wAvYem49Nd1EQABPnjbV5wd7kVsdL9hJMLNuA8i4FiIDJzQclzrCmfYJWXiyGeBQ"
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
   const { rollNumber, password } = req.body;
 
   if (!rollNumber || !password) {
-    return res.status(400).json({ success: false, message: "Roll number and password required" });
+    return res.status(400).json({ success: false, message: 'Roll number and password are required' });
   }
 
   try {
-    // Fetch user
+    const query = `
+      SELECT RollNumber, Name, Email, Password, Year, Semester, Department
+      FROM Students
+      WHERE RollNumber = ? AND Status = 'active'
+    `;
     const result = await client.execute({
-      sql: `
-        SELECT RollNumber, Name, Email, Password, Year, Semester, Department 
-        FROM Students 
-        WHERE RollNumber = ? AND Status = 'active'
-      `,
-      args: [rollNumber]
+      sql: query,
+      args: [rollNumber],
     });
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ success: false, message: "Invalid roll number or password" });
+      return res.status(401).json({ success: false, message: 'Invalid roll number or account not active' });
     }
 
     const user = result.rows[0];
-
-    // Compare password (SHA256 hashed)
-    const inputHash = crypto.createHash("sha256").update(password).digest("hex").toUpperCase();
+    const inputHash = crypto.createHash('sha256').update(password).digest('hex').toUpperCase();
 
     if (inputHash !== user.Password) {
-      return res.status(401).json({ success: false, message: "Invalid roll number or password" });
+      return res.status(401).json({ success: false, message: 'Invalid password' });
     }
 
+    // Remove password from response
     delete user.Password;
 
-    res.status(200).json({
+    // Update LastLogin timestamp
+    await client.execute({
+      sql: 'UPDATE Students SET LastLogin = CURRENT_TIMESTAMP WHERE RollNumber = ?',
+      args: [rollNumber],
+    });
+
+    return res.status(200).json({
       success: true,
-      data: { student: user }
+      data: { student: user },
     });
   } catch (error) {
-    console.error("Turso Login Error:", error.message);
-    res.status(500).json({
-      success: false,
-      message: "DB connection failed. Try again."
-    });
+    console.error('Login DB Error:', error.message);
+    return res.status(500).json({ success: false, message: 'Connection failed. Try again.' });
   }
 }
