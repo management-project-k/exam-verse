@@ -1,14 +1,15 @@
 {
-  "name": "examverse-login",
+  "name": "exam-verse",
   "version": "1.0.0",
-  "description": "ExamVerse Login with MySQL on Filess.io",
-  "main": "api/login.js",
+  "type": "module",
   "scripts": {
     "dev": "vercel dev"
   },
   "dependencies": {
-    "mysql2": "^3.6.0"
+    "@libsql/client": "^0.14.0",
+    "crypto": "builtin"
   },
-  "author": "Project K",
-  "license": "MIT"
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
