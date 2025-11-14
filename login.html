@@ -6,10 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>Exam Verse - Login</title>
-
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-
     :root{
       --primary-blue:#1a73e8;
       --error-red:#dc3545;
@@ -19,7 +17,6 @@
       --dark-gray:#2a2a2a;
       --transition:all .3s ease;
     }
-
     body{
       font-family:'Poppins',sans-serif;
       background:var(--light-bg);
@@ -28,10 +25,7 @@
       transition:var(--transition);
     }
     body.dark{ background:var(--dark-bg); color:#fff; }
-
     .login-page{ min-height:100vh; display:flex; flex-direction:column; position:relative; }
-
-    /* ---------- THEME TOGGLE ---------- */
     .theme-toggle{
       position:absolute; top:24px; right:24px;
       background:none; border:none; cursor:pointer;
@@ -45,8 +39,6 @@
     body.dark .sun-icon{ opacity:0; }
     .moon-icon{ opacity:0; }
     body.dark .moon-icon{ opacity:1; }
-
-    /* ---------- MAIN CARD ---------- */
     .login-main{ flex:1; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
     .login-card{
       width:100%; max-width:400px; padding:40px;
@@ -57,7 +49,6 @@
     }
     body.dark .login-card{ box-shadow:0 20px 60px rgba(0,0,0,.3); }
     @keyframes slideUp{ from{opacity:0;transform:translateY(50px)} to{opacity:1;transform:translateY(0)} }
-
     .login-card h2{ text-align:center; color:var(--primary-blue); font-size:28px; font-weight:600; margin-bottom:8px; }
     .version-capsule{
       display:block; width:fit-content; margin:0 auto 24px;
@@ -65,7 +56,6 @@
       color:var(--primary-blue); font-size:11px; font-weight:600;
       letter-spacing:1.5px; text-transform:uppercase; border-radius:50px;
     }
-
     .form-group{ display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
     .form-group label{ font-weight:500; font-size:14px; }
     .form-group input{
@@ -78,59 +68,48 @@
       outline:none; border-color:var(--primary-blue);
       box-shadow:0 0 0 3px rgba(26,115,232,.1);
     }
-
     .error-message{ color:var(--error-red); font-size:12px; display:none; }
     .error-message.show{ display:block; }
-
     .success-message{
       color:var(--success-green); font-size:12px; text-align:center;
       background:rgba(40,167,69,.1); border-radius:8px;
       padding:12px; margin-bottom:16px; display:none;
     }
     .success-message.show{ display:block; }
-
     .login-btn{
       width:100%; padding:16px; background:var(--primary-blue);
       color:#fff; border:none; border-radius:8px;
       font-weight:600; cursor:pointer; transition:var(--transition);
-      margin-top:8px; margin-bottom:20px;   /* <-- SPACING TO FORGOT */
+      margin-top:8px; margin-bottom:20px;
     }
     .login-btn:hover:not(:disabled){ background:#1557b0; transform:translateY(-2px); }
     .login-btn:disabled{ background:#ccc; cursor:not-allowed; }
-
     .forgot-password{
       text-align:center; color:var(--primary-blue);
       font-size:14px; cursor:pointer; transition:var(--transition);
     }
     .forgot-password:hover{ opacity:.8; }
-
     .loading{ display:none; text-align:center; margin-top:12px; color:var(--primary-blue); }
     .loading.show{ display:block; }
-
-    /* ---------- MODAL ---------- */
     .modal-overlay{
       display:none; position:fixed; inset:0;
       background:rgba(0,0,0,.5); z-index:1000;
       align-items:center; justify-content:center;
     }
     .modal-overlay.show{ display:flex; }
-
     .modal{
       background:var(--light-bg); padding:32px;
       border-radius:16px; max-width:400px; width:90%;
       box-shadow:0 20px 60px rgba(0,0,0,.3);
     }
     body.dark .modal{ background:var(--dark-gray); }
-
     .modal-header h3{ color:var(--primary-blue); font-size:22px; margin-bottom:8px; }
     .modal-header p{ font-size:14px; opacity:.7; margin-bottom:16px; }
-
     .info-row{
       background:rgba(0,0,0,.05); border-radius:8px;
       padding:12px; margin-bottom:12px;
     }
     body.dark .info-row{ background:rgba(255,255,255,.1); }
-
     .info-label{
       font-size:12px; font-weight:600; color:var(--primary-blue);
       text-transform:uppercase; display:block;
@@ -138,21 +117,18 @@
     .info-value{
       font-size:15px; font-weight:500; word-break:break-all;
     }
-
     .btn-close{
       width:100%; background:var(--primary-blue); color:#fff;
       border:none; padding:12px; border-radius:8px;
       cursor:pointer; font-weight:600; margin-top:16px;
     }
     .btn-close:hover{ background:#1557b0; transform:translateY(-1px); }
-
     .footer{
       text-align:center; padding:24px 0; margin-top:auto;
       border-top:1px solid rgba(0,0,0,.1);
     }
     body.dark .footer{ border-top-color:rgba(255,255,255,.1); }
     .footer a{ color:var(--primary-blue); text-decoration:none; font-weight:500; }
-
     @media (max-width:768px){
       .login-card{ padding:32px 24px; }
       .login-card h2{ font-size:24px; }
@@ -161,7 +137,6 @@
 </head>
 <body>
   <div class="login-page">
-    <!-- Theme Toggle -->
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
       <svg class="theme-icon sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="5"/>
@@ -174,48 +149,39 @@
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
     </button>
-
     <main class="login-main">
       <div class="login-card">
         <h2>Login Into<br/>Exam Verse</h2>
         <span class="version-capsule">Version 1.0</span>
-
         <div class="success-message" id="successMessage"></div>
-
         <form id="loginForm">
           <div class="form-group">
             <label for="rollNumber">Roll Number</label>
             <input type="text" id="rollNumber" required placeholder="Enter your roll number" autocomplete="username"/>
             <div class="error-message" id="rollNumberError"></div>
           </div>
-
           <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" required placeholder="Enter your password" autocomplete="current-password"/>
             <div class="error-message" id="passwordError"></div>
           </div>
-
           <button type="submit" class="login-btn" id="loginBtn">Login</button>
           <div class="loading" id="loading">Authenticating...</div>
-
           <div class="forgot-password" onclick="openAdminModal()">Forgot Password?</div>
         </form>
       </div>
     </main>
-
     <footer class="footer">
       <p>Designed & Developed by <a href="https://www.project-k.co.in" target="_blank">Project K</a></p>
     </footer>
   </div>
 
-  <!-- ADMIN CONTACT MODAL -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeAdminModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3>Contact Admin</h3>
         <p>For Any Account Assistance</p>
       </div>
-
       <div class="info-row">
         <span class="info-label">Admin Name</span>
         <span class="info-value">MIDUTHURU RANGASWAMY</span>
@@ -224,13 +190,12 @@
         <span class="info-label">Email ID</span>
         <span class="info-value">miduthuru.rangaswamy@gmail.com</span>
       </div>
-
       <button class="btn-close" onclick="closeAdminModal()">Close</button>
     </div>
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+    const LOGIN_API = '/api/login';  // Vercel API route
 
     let isDark = localStorage.getItem('theme') === 'dark';
     if (isDark) document.body.classList.add('dark');
@@ -241,59 +206,67 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
 
-    function openAdminModal()  { document.getElementById('modalOverlay').classList.add('show'); }
-    function closeAdminModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+    function openAdminModal() { 
+      document.getElementById('modalOverlay').classList.add('show'); 
+    }
+    function closeAdminModal(){ 
+      document.getElementById('modalOverlay').classList.remove('show'); 
+    }
 
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
-
       const roll = document.getElementById('rollNumber').value.trim();
       const pass = document.getElementById('password').value.trim();
-      const btn  = document.getElementById('loginBtn');
+      const btn = document.getElementById('loginBtn');
       const rollErr = document.getElementById('rollNumberError');
       const passErr = document.getElementById('passwordError');
 
-      // ---- quick client‑side validation ----
-      rollErr.classList.remove('show'); passErr.classList.remove('show');
-      if (!roll){ rollErr.textContent='Roll number required'; rollErr.classList.add('show'); return; }
-      if (!pass){ passErr.textContent='Password required'; passErr.classList.add('show'); return; }
+      rollErr.classList.remove('show'); 
+      passErr.classList.remove('show');
 
-      btn.disabled = true; btn.textContent = 'Logging in...';
+      if (!roll) { rollErr.textContent = 'Roll number required'; rollErr.classList.add('show'); return; }
+      if (!pass) { passErr.textContent = 'Password required'; passErr.classList.add('show'); return; }
+
+      btn.disabled = true; 
+      btn.textContent = 'Logging in...';
       document.getElementById('loading').classList.add('show');
 
-      try{
-        const res = await fetch(SCRIPT_URL,{
-          method:'POST',
-          body:JSON.stringify({action:'studentLogin',rollNumber:roll,password:pass})
+      try {
+        const res = await fetch(LOGIN_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rollNumber: roll, password: pass })
         });
+
         const result = await res.json();
 
-        if(result.success){
+        if (result.success) {
           sessionStorage.setItem('currentStudent', JSON.stringify(result.data.student));
-          sessionStorage.setItem('isLoggedIn','true');
+          sessionStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('studentData', JSON.stringify(result.data.student));
 
           const msg = document.getElementById('successMessage');
-          msg.textContent='Login successful! Redirecting...';
+          msg.textContent = 'Login successful! Redirecting...';
           msg.classList.add('show');
 
-          setTimeout(()=>location.href='student-dashboard.html',1500);
-        }else{
-          passErr.textContent = result.message || 'Invalid credentials';
+          setTimeout(() => location.href = 'student-dashboard.html', 1500);
+        } else {
+          passErr.textContent = result.message || 'Login failed';
           passErr.classList.add('show');
         }
-      }catch{
-        passErr.textContent='Connection error';
+      } catch (err) {
+        console.error('Login fetch error:', err);
+        passErr.textContent = 'Connection failed. Please try again.';
         passErr.classList.add('show');
-      }finally{
-        btn.disabled=false; btn.textContent='Login';
+      } finally {
+        btn.disabled = false; 
+        btn.textContent = 'Login';
         document.getElementById('loading').classList.remove('show');
       }
     });
 
-    // Auto‑redirect if already logged in
-    if(sessionStorage.getItem('isLoggedIn')==='true'){
-      location.href='student-dashboard.html';
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+      location.href = 'student-dashboard.html';
     }
   </script>
 </body>
