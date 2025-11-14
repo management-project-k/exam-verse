@@ -43,11 +43,14 @@
     .login-card{
       width:100%; max-width:400px; padding:40px;
       border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.1);
-      background:rgba(255,255,255,.1); backdrop-filter:blur(10px);
+      background:rgba(255,255,255,.95); backdrop-filter:blur(10px);
       border:1px solid rgba(255,255,255,.2);
       animation:slideUp .6s ease-out;
     }
-    body.dark .login-card{ box-shadow:0 20px 60px rgba(0,0,0,.3); }
+    body.dark .login-card{ 
+      background:rgba(42,42,42,.95); 
+      box-shadow:0 20px 60px rgba(0,0,0,.3); 
+    }
     @keyframes slideUp{ from{opacity:0;transform:translateY(50px)} to{opacity:1;transform:translateY(0)} }
     .login-card h2{ text-align:center; color:var(--primary-blue); font-size:28px; font-weight:600; margin-bottom:8px; }
     .version-capsule{
@@ -62,16 +65,17 @@
       padding:14px 16px; border:2px solid rgba(0,0,0,.1);
       border-radius:8px; font-family:'Poppins',sans-serif;
       font-size:16px; transition:var(--transition);
+      background:white;
     }
     body.dark .form-group input{ background:var(--dark-gray); color:#fff; border-color:rgba(255,255,255,.1); }
     .form-group input:focus{
       outline:none; border-color:var(--primary-blue);
       box-shadow:0 0 0 3px rgba(26,115,232,.1);
     }
-    .error-message{ color:var(--error-red); font-size:12px; display:none; }
+    .error-message{ color:var(--error-red); font-size:12px; display:none; margin-top:4px; }
     .error-message.show{ display:block; }
     .success-message{
-      color:var(--success-green); font-size:12px; text-align:center;
+      color:var(--success-green); font-size:14px; text-align:center;
       background:rgba(40,167,69,.1); border-radius:8px;
       padding:12px; margin-bottom:16px; display:none;
     }
@@ -80,13 +84,14 @@
       width:100%; padding:16px; background:var(--primary-blue);
       color:#fff; border:none; border-radius:8px;
       font-weight:600; cursor:pointer; transition:var(--transition);
-      margin-top:8px; margin-bottom:20px;
+      margin-top:8px; margin-bottom:20px; font-size:16px;
     }
     .login-btn:hover:not(:disabled){ background:#1557b0; transform:translateY(-2px); }
-    .login-btn:disabled{ background:#ccc; cursor:not-allowed; }
+    .login-btn:disabled{ background:#ccc; cursor:not-allowed; opacity:0.6; }
     .forgot-password{
       text-align:center; color:var(--primary-blue);
       font-size:14px; cursor:pointer; transition:var(--transition);
+      text-decoration:none; display:block;
     }
     .forgot-password:hover{ opacity:.8; }
     .loading{ display:none; text-align:center; margin-top:12px; color:var(--primary-blue); }
@@ -95,6 +100,7 @@
       display:none; position:fixed; inset:0;
       background:rgba(0,0,0,.5); z-index:1000;
       align-items:center; justify-content:center;
+      backdrop-filter:blur(5px);
     }
     .modal-overlay.show{ display:flex; }
     .modal{
@@ -112,7 +118,7 @@
     body.dark .info-row{ background:rgba(255,255,255,.1); }
     .info-label{
       font-size:12px; font-weight:600; color:var(--primary-blue);
-      text-transform:uppercase; display:block;
+      text-transform:uppercase; display:block; margin-bottom:4px;
     }
     .info-value{
       font-size:15px; font-weight:500; word-break:break-all;
@@ -121,10 +127,11 @@
       width:100%; background:var(--primary-blue); color:#fff;
       border:none; padding:12px; border-radius:8px;
       cursor:pointer; font-weight:600; margin-top:16px;
+      font-size:15px;
     }
     .btn-close:hover{ background:#1557b0; transform:translateY(-1px); }
     .footer{
-      text-align:center; padding:24px 0; margin-top:auto;
+      text-align:center; padding:24px 0;
       border-top:1px solid rgba(0,0,0,.1);
     }
     body.dark .footer{ border-top-color:rgba(255,255,255,.1); }
@@ -149,40 +156,43 @@
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
     </button>
-
+    
     <main class="login-main">
       <div class="login-card">
         <h2>Login Into<br/>Exam Verse</h2>
         <span class="version-capsule">Version 1.0</span>
         <div class="success-message" id="successMessage"></div>
+        
         <form id="loginForm">
           <div class="form-group">
             <label for="rollNumber">Roll Number</label>
             <input type="text" id="rollNumber" required placeholder="Enter your roll number" autocomplete="username"/>
             <div class="error-message" id="rollNumberError"></div>
           </div>
+          
           <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" required placeholder="Enter your password" autocomplete="current-password"/>
             <div class="error-message" id="passwordError"></div>
           </div>
+          
           <button type="submit" class="login-btn" id="loginBtn">Login</button>
           <div class="loading" id="loading">Authenticating...</div>
-          <div class="forgot-password" onclick="openAdminModal()">Forgot Password?</div>
+          <a href="#" class="forgot-password" onclick="openAdminModal(); return false;">Forgot Password?</a>
         </form>
       </div>
     </main>
-
+    
     <footer class="footer">
       <p>Designed & Developed by <a href="https://www.project-k.co.in" target="_blank">Project K</a></p>
     </footer>
   </div>
 
-  <div class="modal-overlay" id="modalOverlay" onclick="closeAdminModal()">
+  <div class="modal-overlay" id="modalOverlay" onclick="closeAdminModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3>Contact Admin</h3>
-        <p>For Any Account Assistance</p>
+        <p>For Account Recovery Assistance</p>
       </div>
       <div class="info-row">
         <span class="info-label">Admin Name</span>
@@ -208,30 +218,46 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
 
-    function openAdminModal() {
-      document.getElementById('modalOverlay').classList.add('show');
+    function openAdminModal() { 
+      document.getElementById('modalOverlay').classList.add('show'); 
     }
-    function closeAdminModal() {
-      document.getElementById('modalOverlay').classList.remove('show');
+    
+    function closeAdminModal(event){ 
+      if (!event || event.target === document.getElementById('modalOverlay')) {
+        document.getElementById('modalOverlay').classList.remove('show');
+      }
     }
 
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
+      
       const roll = document.getElementById('rollNumber').value.trim();
-      const pass = document.getElementById('password').value.trim();
+      const pass = document.getElementById('password').value;
       const btn = document.getElementById('loginBtn');
       const rollErr = document.getElementById('rollNumberError');
       const passErr = document.getElementById('passwordError');
+      const loading = document.getElementById('loading');
 
-      rollErr.classList.remove('show');
+      // Clear previous errors
+      rollErr.classList.remove('show'); 
       passErr.classList.remove('show');
 
-      if (!roll) { rollErr.textContent = 'Roll number required'; rollErr.classList.add('show'); return; }
-      if (!pass) { passErr.textContent = 'Password required'; passErr.classList.add('show'); return; }
+      // Validate
+      if (!roll) { 
+        rollErr.textContent = 'Roll number is required'; 
+        rollErr.classList.add('show'); 
+        return; 
+      }
+      if (!pass) { 
+        passErr.textContent = 'Password is required'; 
+        passErr.classList.add('show'); 
+        return; 
+      }
 
-      btn.disabled = true;
+      // Show loading
+      btn.disabled = true; 
       btn.textContent = 'Logging in...';
-      document.getElementById('loading').classList.add('show');
+      loading.classList.add('show');
 
       try {
         const res = await fetch(LOGIN_API, {
@@ -239,35 +265,43 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ rollNumber: roll, password: pass })
         });
+
         const result = await res.json();
 
         if (result.success) {
+          // Store session data
           sessionStorage.setItem('currentStudent', JSON.stringify(result.data.student));
+          sessionStorage.setItem('sessionId', result.data.student.SessionID);
           sessionStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('studentData', JSON.stringify(result.data.student));
 
+          // Show success
           const msg = document.getElementById('successMessage');
           msg.textContent = 'Login successful! Redirecting...';
           msg.classList.add('show');
 
-          setTimeout(() => location.href = 'student-dashboard.html', 1500);
+          // Redirect
+          setTimeout(() => {
+            window.location.href = 'student-dashboard.html';
+          }, 1500);
         } else {
-          passErr.textContent = result.message || 'Login failed';
+          passErr.textContent = result.message || 'Invalid credentials';
           passErr.classList.add('show');
         }
       } catch (err) {
-        console.error('Login fetch error:', err);
+        console.error('Login error:', err);
         passErr.textContent = 'Connection failed. Please try again.';
         passErr.classList.add('show');
       } finally {
-        btn.disabled = false;
+        btn.disabled = false; 
         btn.textContent = 'Login';
-        document.getElementById('loading').classList.remove('show');
+        loading.classList.remove('show');
       }
     });
 
+    // Auto-redirect if already logged in
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
-      location.href = 'student-dashboard.html';
+      window.location.href = 'student-dashboard.html';
     }
   </script>
 </body>
