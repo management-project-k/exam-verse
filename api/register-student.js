@@ -1,30 +1,42 @@
+// api/register-student.js
 import { createClient } from "@turso/database";
 import crypto from "crypto";
 
 const client = createClient({
   url: "libsql://exam-verse-3-tfixcom.aws-ap-south-1.turso.io",
-  authToken: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NjMxMDgwNjYsImlkIjoiZjQyMzM4ODktMThiNC00ZTNhLWI0ODQtZjc1ZDlhN2E4ZTgwIiwicmlkIjoiYTYxNDI5MjktZGExZS00NDkxLTliNTQtYWIxNTRmYWEzNjU1In0.hZ-HEKLDUehJXmtlJjK0L8wAvYem49Nd1EQABPnjbV5wd7kVsdL9hJMLNuA8i4FiIDJzQclzrCmfYJWXiyGeBQ"
+  authToken:
+    "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NjMxMDgwNjYsImlkIjoiZjQyMzM4ODktMThiNC00ZTNhLWI0ODQtZjc1ZDlhN2E4ZTgwIiwicmlkIjoiYTYxNDI5MjktZGExZS00NDkxLTliNTQtYWIxNTRmYWEzNjU1In0.hZ-HEKLDUehJXmtlJjK0L8wAvYem49Nd1EQABPnjbV5wd7kVsdL9hJMLNuA8i4FiIDJzQclzrCmfYJWXiyGeBQ",
 });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method not allowed" });
+    return res
+      .status(405)
+      .json({ success: false, message: "Method not allowed" });
   }
 
   const {
-    rollNumber, name, email, phone, year, semester,
-    department, college, password, confirmPassword
+    rollNumber,
+    name,
+    email,
+    phone,
+    year,
+    semester,
+    department,
+    college,
+    password,
+    confirmPassword,
   } = req.body;
 
-  // Validation
   const errors = [];
+
   if (!rollNumber) errors.push("Roll Number is required.");
   if (!name) errors.push("Full Name is required.");
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     errors.push("Valid Email is required.");
   if (!phone || !/^\+?\d{10,15}$/.test(phone))
-    errors.push("Valid Phone (10-15 digits) is required.");
-  if (!year) errors.push("Year of Study is required.");
+    errors.push("Valid Phone (10–15 digits) is required.");
+  if (!year) errors.push("Year is required.");
   if (!semester) errors.push("Semester is required.");
   if (!college) errors.push("College is required.");
   if (password !== confirmPassword) errors.push("Passwords do not match.");
@@ -32,7 +44,10 @@ export default async function handler(req, res) {
     errors.push("Password must be at least 6 characters.");
 
   if (errors.length > 0) {
-    return res.status(400).json({ success: false, message: errors.join(" ") });
+    return res.status(400).json({
+      success: false,
+      message: errors.join(" "),
+    });
   }
 
   const hashedPassword = crypto
@@ -42,25 +57,25 @@ export default async function handler(req, res) {
     .toUpperCase();
 
   try {
-    // Check if student already exists
-    const existing = await client.execute({
-      sql: "SELECT RollNumber FROM Students WHERE RollNumber = ? OR Email = ?",
-      args: [rollNumber, email]
+    // -------- CHECK EXISTING STUDENT --------
+    const check = await client.execute({
+      sql: "SELECT RollNumber FROM Students WHERE RollNumber = ? OR Email = ?;",
+      args: [rollNumber, email],
     });
 
-    if (existing.rows.length > 0) {
+    if (check.rows.length > 0) {
       return res.status(409).json({
         success: false,
-        message: "Roll Number or Email already exists."
+        message: "Roll Number or Email already exists.",
       });
     }
 
-    // Insert new student
+    // -------- INSERT NEW STUDENT --------
     await client.execute({
       sql: `
         INSERT INTO Students 
         (RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active');
       `,
       args: [
         rollNumber,
@@ -71,19 +86,23 @@ export default async function handler(req, res) {
         year,
         semester,
         department,
-        college
-      ]
+        college,
+      ],
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Registration successful! Please login."
+      message: "Registration successful!",
     });
   } catch (error) {
-    console.error("Turso Register Error:", error);
-    res.status(500).json({
+    console.error("Turso Register Error:", {
+      message: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
       success: false,
-      message: "Server error. Try again."
+      message: "Server error. Try again.",
     });
   }
 }
