@@ -1,18 +1,18 @@
 // api/register-student.js
-import { createClient } from "@turso/database";
-import crypto from "crypto";
+import { createClient } from '@libsql/client';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const client = createClient({
-  url: "libsql://exam-verse-3-tfixcom.aws-ap-south-1.turso.io",
-  authToken:
-    "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NjMxMDgwNjYsImlkIjoiZjQyMzM4ODktMThiNC00ZTNhLWI0ODQtZjc1ZDlhN2E4ZTgwIiwicmlkIjoiYTYxNDI5MjktZGExZS00NDkxLTliNTQtYWIxNTRmYWEzNjU1In0.hZ-HEKLDUehJXmtlJjK0L8wAvYem49Nd1EQABPnjbV5wd7kVsdL9hJMLNuA8i4FiIDJzQclzrCmfYJWXiyGeBQ",
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
   const {
@@ -28,63 +28,68 @@ export default async function handler(req, res) {
     confirmPassword,
   } = req.body;
 
+  // Validation
   const errors = [];
-
-  if (!rollNumber) errors.push("Roll Number is required.");
-  if (!name) errors.push("Full Name is required.");
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    errors.push("Valid Email is required.");
-  if (!phone || !/^\+?\d{10,15}$/.test(phone))
-    errors.push("Valid Phone (10–15 digits) is required.");
-  if (!year) errors.push("Year is required.");
-  if (!semester) errors.push("Semester is required.");
-  if (!college) errors.push("College is required.");
-  if (password !== confirmPassword) errors.push("Passwords do not match.");
-  if (!password || password.length < 6)
-    errors.push("Password must be at least 6 characters.");
+  if (!rollNumber) errors.push('Roll Number is required.');
+  if (!name) errors.push('Full Name is required.');
+  if (!email || !/^[^\s@]+@(?:svr|govpoly)\.(?:edu|ac)\.in$/.test(email)) {
+    errors.push('Official email (@svr.ac.in or @govpoly.ac.in) required.');
+  }
+  if (!phone || !/^\+?\d{10,12}$/.test(phone)) errors.push('Valid phone number required.');
+  if (!year || !['1', '2', '3'].includes(year)) errors.push('Valid Year of Study required.');
+  if (!semester || !['1', '3', '4', '5'].includes(semester)) errors.push('Valid Semester required.');
+  if (department !== 'Computer Engineering') errors.push('Department must be Computer Engineering.');
+  if (!college || !['Government Polytechnic Proddatur', 'SVR Engineering College Nandyal'].includes(college)) {
+    errors.push('Valid college required.');
+  }
+  if (!password || password.length < 6) errors.push('Password must be at least 6 characters.');
+  if (password !== confirmPassword) errors.push('Passwords do not match.');
 
   if (errors.length > 0) {
-    return res.status(400).json({
-      success: false,
-      message: errors.join(" "),
-    });
+    return res.status(400).json({ success: false, message: errors.join(' ') });
   }
 
-  const hashedPassword = crypto
-    .createHash("sha256")
-    .update(password)
-    .digest("hex")
-    .toUpperCase();
+  // Hash password
+  const hashedPassword = crypto.createHash('sha256').update(password).digest('hex').toUpperCase();
 
   try {
-    // -------- CHECK EXISTING STUDENT --------
-    const check = await client.execute({
-      sql: "SELECT RollNumber FROM Students WHERE RollNumber = ? OR Email = ?;",
+    // Check for existing roll number or email
+    const checkQuery = `
+      SELECT RollNumber, Email
+      FROM Students
+      WHERE RollNumber = ? OR Email = ?
+    `;
+    const checkResult = await client.execute({
+      sql: checkQuery,
       args: [rollNumber, email],
     });
 
-    if (check.rows.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: "Roll Number or Email already exists.",
-      });
+    if (checkResult.rows.length > 0) {
+      const existing = checkResult.rows[0];
+      if (existing.RollNumber === rollNumber) {
+        return res.status(409).json({ success: false, message: 'Roll Number already registered.' });
+      }
+      if (existing.Email === email) {
+        return res.status(409).json({ success: false, message: 'Email already registered.' });
+      }
     }
 
-    // -------- INSERT NEW STUDENT --------
+    // Insert new student
+    const insertQuery = `
+      INSERT INTO Students (
+        RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status, AccountCreated
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
+    `;
     await client.execute({
-      sql: `
-        INSERT INTO Students 
-        (RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active');
-      `,
+      sql: insertQuery,
       args: [
         rollNumber,
         name,
         email,
         phone,
         hashedPassword,
-        year,
-        semester,
+        parseInt(year),
+        parseInt(semester),
         department,
         college,
       ],
@@ -92,17 +97,10 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: "Registration successful!",
+      message: 'Registration successful!',
     });
   } catch (error) {
-    console.error("Turso Register Error:", {
-      message: error.message,
-      stack: error.stack,
-    });
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error. Try again.",
-    });
+    console.error('Student register error:', error);
+    return res.status(500).json({ success: false, message: 'Server error. Try again.' });
   }
 }
