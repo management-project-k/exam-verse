@@ -3,16 +3,7 @@ import { createClient } from '@libsql/client';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
+  // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ 
       success: false, 
@@ -30,50 +21,32 @@ export default async function handler(req, res) {
     department,
     college,
     password,
-    confirmPassword
-  } = req.body;
+    confirmPassword,
+  } = req.body || {};
 
   // Validation
   const errors = [];
   
-  if (!rollNumber?.trim()) {
-    errors.push('Roll number is required');
+  if (!rollNumber?.trim()) errors.push('Roll number is required');
+  if (!name?.trim()) errors.push('Full name is required');
+  if (!email?.trim()) errors.push('Email is required');
+  if (!phone?.trim()) errors.push('Phone number is required');
+  if (!year) errors.push('Year is required');
+  if (!semester) errors.push('Semester is required');
+  if (!college?.trim()) errors.push('College is required');
+  if (!password || password.length < 6) errors.push('Password must be at least 6 characters');
+  if (password !== confirmPassword) errors.push('Passwords do not match');
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (email && !emailRegex.test(email)) {
+    errors.push('Invalid email format');
   }
-  
-  if (!name?.trim()) {
-    errors.push('Full name is required');
-  }
-  
-  if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.push('Valid email is required');
-  }
-  
-  if (!phone?.trim() || !/^[0-9]{10}$/.test(phone)) {
-    errors.push('Valid 10-digit phone number is required');
-  }
-  
-  if (!year || year < 1 || year > 3) {
-    errors.push('Valid year (1-3) is required');
-  }
-  
-  if (!semester || semester < 1 || semester > 6) {
-    errors.push('Valid semester (1-6) is required');
-  }
-  
-  if (!department?.trim()) {
-    errors.push('Department is required');
-  }
-  
-  if (!college?.trim()) {
-    errors.push('College is required');
-  }
-  
-  if (!password || password.length < 6) {
-    errors.push('Password must be at least 6 characters');
-  }
-  
-  if (password !== confirmPassword) {
-    errors.push('Passwords do not match');
+
+  // Phone validation (Indian format)
+  const phoneRegex = /^[6-9]\d{9}$/;
+  if (phone && !phoneRegex.test(phone.replace(/\D/g, ''))) {
+    errors.push('Invalid phone number (10 digits required)');
   }
 
   if (errors.length > 0) {
@@ -83,7 +56,7 @@ export default async function handler(req, res) {
     });
   }
 
-  // Create database client
+  // Create Turso client
   const client = createClient({
     url: process.env.TURSO_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
@@ -92,24 +65,27 @@ export default async function handler(req, res) {
   try {
     // Enable foreign keys
     await client.execute('PRAGMA foreign_keys = ON');
-    
+
     // Check if roll number already exists
     const existingStudent = await client.execute({
-      sql: 'SELECT RollNumber FROM Students WHERE RollNumber = ?',
-      args: [rollNumber]
+      sql: `SELECT RollNumber, Status FROM Students WHERE RollNumber = ?`,
+      args: [rollNumber],
     });
 
     if (existingStudent.rows.length > 0) {
-      return res.status(409).json({ 
-        success: false, 
-        message: 'Roll number already registered' 
-      });
+      const status = existingStudent.rows[0].Status;
+      if (status === 'active' || status === 'pending') {
+        return res.status(409).json({ 
+          success: false, 
+          message: 'Roll number already registered' 
+        });
+      }
     }
 
     // Check if email already exists
     const existingEmail = await client.execute({
-      sql: 'SELECT Email FROM Students WHERE Email = ?',
-      args: [email]
+      sql: `SELECT Email FROM Students WHERE Email = ? AND Status != 'deleted'`,
+      args: [email],
     });
 
     if (existingEmail.rows.length > 0) {
@@ -126,28 +102,16 @@ export default async function handler(req, res) {
       .digest('hex')
       .toUpperCase();
 
-    // Begin transaction
+    // Start transaction
     await client.execute('BEGIN TRANSACTION');
 
     try {
-      // Insert student
+      // Insert student record
       await client.execute({
-        sql: `INSERT INTO Students (
-                RollNumber, 
-                Name, 
-                Email, 
-                Phone, 
-                Password, 
-                Year, 
-                Semester, 
-                Department, 
-                College, 
-                Status, 
-                AccountCreated,
-                NoOfMockTests,
-                OverallScore,
-                Rank
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP, 0, 0.0, 0)`,
+        sql: `INSERT INTO Students 
+              (RollNumber, Name, Email, Phone, Password, Year, Semester, 
+               Department, College, Status, AccountCreated, NoOfMockTests, OverallScore, Rank)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP, 0, 0.0, 0)`,
         args: [
           rollNumber,
           name,
@@ -156,160 +120,109 @@ export default async function handler(req, res) {
           hashedPassword,
           year,
           semester,
-          department,
+          department || 'Computer Engineering',
           college
-        ]
+        ],
       });
 
-      // Create profile
+      // Create student profile
       await client.execute({
-        sql: `INSERT INTO StudentProfiles (
-                RollNumber,
-                PrivacyLevel,
-                ProfileViews,
-                FollowersCount,
-                FollowingCount,
-                PostsCount,
-                AccountType,
-                IsPrivate,
-                IsVerified
-              ) VALUES (?, 'public', 0, 0, 0, 0, 'public', FALSE, FALSE)`,
-        args: [rollNumber]
+        sql: `INSERT INTO StudentProfiles 
+              (RollNumber, PrivacyLevel, ProfileViews, FollowersCount, 
+               FollowingCount, PostsCount, AccountType, IsPrivate, IsVerified)
+              VALUES (?, 'public', 0, 0, 0, 0, 'public', 0, 0)`,
+        args: [rollNumber],
       });
 
       // Create default settings
       await client.execute({
-        sql: `INSERT INTO UserSettings (
-                SettingID,
-                RollNumber,
-                ThemeMode,
-                Language,
-                NotificationsEnabled,
-                PrivacyLevel,
-                EmailNotifications
-              ) VALUES (?, ?, 'light', 'en', TRUE, 'public', TRUE)`,
-        args: [`SET_${rollNumber}`, rollNumber]
+        sql: `INSERT INTO UserSettings 
+              (SettingID, RollNumber, ThemeMode, Language, NotificationsEnabled, 
+               PrivacyLevel, EmailNotifications, LastModified)
+              VALUES (?, ?, 'light', 'en', 1, 'public', 1, CURRENT_TIMESTAMP)`,
+        args: [`set_${rollNumber}`, rollNumber],
       });
 
       // Create notification preferences
       await client.execute({
-        sql: `INSERT INTO NotificationPreferences (
-                PrefID,
-                RollNumber,
-                LikesEnabled,
-                CommentsEnabled,
-                MessagesEnabled,
-                GroupsEnabled,
-                TestRemindersEnabled
-              ) VALUES (?, ?, TRUE, TRUE, TRUE, TRUE, TRUE)`,
-        args: [`PREF_${rollNumber}`, rollNumber]
+        sql: `INSERT INTO NotificationPreferences 
+              (PrefID, RollNumber, LikesEnabled, CommentsEnabled, MessagesEnabled, 
+               GroupsEnabled, TestRemindersEnabled)
+              VALUES (?, ?, 1, 1, 1, 1, 1)`,
+        args: [`pref_${rollNumber}`, rollNumber],
       });
 
       // Create privacy settings
       await client.execute({
-        sql: `INSERT INTO PrivacySettings (
-                SettingID,
-                UserRoll,
-                AccountType,
-                ProfileVisibility,
-                WhoCanMessage,
-                WhoCanTag,
-                WhoCanSeeFollowers,
-                WhoCanSeePosts,
-                WhoCanSeeStories,
-                WhoCanComment,
-                ShowOnlineStatus
-              ) VALUES (?, ?, 'public', 'everyone', 'everyone', 'everyone', 
-                       'everyone', 'everyone', 'everyone', 'everyone', TRUE)`,
-        args: [`PRIV_${rollNumber}`, rollNumber]
+        sql: `INSERT INTO PrivacySettings 
+              (SettingID, UserRoll, AccountType, ProfileVisibility, WhoCanMessage, 
+               WhoCanTag, WhoCanSeeFollowers, WhoCanSeePosts, WhoCanSeeStories, 
+               WhoCanComment, ShowOnlineStatus)
+              VALUES (?, ?, 'public', 'everyone', 'everyone', 'everyone', 
+                      'everyone', 'everyone', 'everyone', 'everyone', 1)`,
+        args: [`priv_${rollNumber}`, rollNumber],
       });
 
-      // Log registration
+      // Log registration activity
       await client.execute({
-        sql: `INSERT INTO StudentActivity (
-                ActivityID,
-                StudentRoll,
-                ActivityType,
-                Description,
-                IPAddress,
-                UserAgent
-              ) VALUES (?, ?, 'REGISTRATION', 'Account created', ?, ?)`,
+        sql: `INSERT INTO StudentActivity 
+              (ActivityID, StudentRoll, ActivityType, Description, IPAddress)
+              VALUES (?, ?, 'registration', 'New student registration', ?)`,
         args: [
-          `ACT_${Date.now()}`,
+          `act_${Date.now()}`,
           rollNumber,
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown',
-          req.headers['user-agent'] || 'Unknown'
-        ]
+          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
+        ],
       });
 
-      // Create notification for admin
+      // Add welcome notification
       await client.execute({
-        sql: `INSERT INTO Notifications (
-                NotificationID,
-                RecipientRoll,
-                Type,
-                Title,
-                Message,
-                SenderRoll
-              ) VALUES (?, 'ADMIN', 'NEW_REGISTRATION', 'New Student Registration', ?, ?)`,
-        args: [
-          `NOTIF_${Date.now()}`,
-          `New student ${name} (${rollNumber}) has registered and requires approval`,
-          rollNumber
-        ]
+        sql: `INSERT INTO Notifications 
+              (NotificationID, RecipientRoll, Type, Title, Message, IsRead)
+              VALUES (?, ?, 'welcome', 'Welcome to Exam Verse!', 
+                      'Your account has been created. Awaiting admin approval.', 0)`,
+        args: [`notif_${Date.now()}`, rollNumber],
       });
 
       // Commit transaction
       await client.execute('COMMIT');
 
-      return res.status(200).json({
+      res.status(200).json({
         success: true,
         message: 'Registration successful! Your account is pending admin approval.',
-        data: {
-          rollNumber,
-          name,
-          email
+        data: { 
+          rollNumber, 
+          name 
         }
       });
 
-    } catch (transactionError) {
+    } catch (txError) {
       // Rollback on error
       await client.execute('ROLLBACK');
-      throw transactionError;
+      throw txError;
     }
 
   } catch (error) {
     console.error('Registration error:', error);
-    
-    // Log error
-    try {
-      await client.execute({
-        sql: `INSERT INTO ErrorLogs (
-                ErrorID,
-                ErrorType,
-                ErrorMessage,
-                ActionAttempted,
-                IPAddress,
-                RequestData
-              ) VALUES (?, 'REGISTRATION_ERROR', ?, 'Student Registration', ?, ?)`,
-        args: [
-          `ERR_${Date.now()}`,
-          error.message,
-          req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown',
-          JSON.stringify({ rollNumber, email })
-        ]
-      });
-    } catch (logError) {
-      console.error('Failed to log error:', logError);
-    }
 
-    return res.status(500).json({ 
+    // Log error
+    await client.execute({
+      sql: `INSERT INTO ErrorLogs 
+            (ErrorID, ErrorType, ErrorMessage, ActionAttempted, RequestData, IPAddress)
+            VALUES (?, 'registration_error', ?, 'student_registration', ?, ?)`,
+      args: [
+        `err_${Date.now()}`,
+        error.message || 'Unknown error',
+        JSON.stringify({ rollNumber, email }),
+        req.headers['x-forwarded-for'] || 'unknown'
+      ],
+    }).catch(console.error);
+
+    res.status(500).json({ 
       success: false, 
       message: 'Server error. Please try again later.' 
     });
-    
   } finally {
-    // Always close the client
-    await client.close();
+    client.close();
   }
 }
