@@ -2,12 +2,26 @@
 import { createClient } from '@libsql/client/http';
 import crypto from 'crypto';
 
+const url = process.env.TURSO_DATABASE_URL;
+const authToken = process.env.TURSO_AUTH_TOKEN;
+
+console.log('TURSO_URL:', url ? 'Set' : 'Missing');
+console.log('TURSO_TOKEN:', authToken ? 'Set (starts with eyJ...)' : 'Missing');
+
+if (!url || !authToken) {
+  console.error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN');
+}
+
 const client = createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
+  url,
+  authToken,
 });
 
 export default async function handler(req, res) {
+  if (!url || !authToken) {
+    return res.status(500).json({ success: false, message: 'Server configuration error. Contact admin.' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
@@ -25,7 +39,6 @@ export default async function handler(req, res) {
     confirmPassword,
   } = req.body;
 
-  // Validation
   const errors = [];
   if (!rollNumber) errors.push('Roll Number is required.');
   if (!name) errors.push('Full Name is required.');
@@ -46,20 +59,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, message: errors.join(' ') });
   }
 
-  // Hash password
   const hashedPassword = crypto.createHash('sha256').update(password).digest('hex').toUpperCase();
 
   try {
-    // Check for existing roll number or email
-    const checkQuery = {
+    await client.execute('SELECT 1');
+
+    const checkResult = await client.execute({
       sql: `
         SELECT RollNumber, Email
         FROM Students
         WHERE RollNumber = ? OR Email = ?
       `,
       args: [rollNumber, email],
-    };
-    const checkResult = await client.execute(checkQuery);
+    });
 
     if (checkResult.rows.length > 0) {
       const existing = checkResult.rows[0];
@@ -71,8 +83,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // Insert new student
-    const insertQuery = {
+    await client.execute({
       sql: `
         INSERT INTO Students (
           RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status, AccountCreated
@@ -89,21 +100,21 @@ export default async function handler(req, res) {
         department,
         college,
       ],
-    };
-    await client.execute(insertQuery);
+    });
 
     return res.status(200).json({
       success: true,
       message: 'Registration successful!',
     });
   } catch (error) {
-    console.error('Student register error:', error);  // This will appear in Vercel logs
-    // Handle specific LibSQL errors
-    if (error.message.includes('401')) {
-      return res.status(500).json({ success: false, message: 'Database authentication failed. Contact admin.' });
-    } else if (error.message.includes('URL_INVALID')) {
-      return res.status(500).json({ success: false, message: 'Invalid database URL. Contact admin.' });
+    console.error('Register error:', error.message, error.stack);
+    if (error.message?.includes('401')) {
+      return res.status(500).json({ success: false, message: 'Database authentication failed. Token invalid – contact admin.' });
+    } else if (error.message?.includes('URL_INVALID')) {
+      return res.status(500).json({ success: false, message: 'Invalid database URL. Check configuration.' });
+    } else if (error.message?.includes('table Students does not exist')) {
+      return res.status(500).json({ success: false, message: 'Database schema not initialized. Contact admin.' });
     }
-    return res.status(500).json({ success: false, message: 'Server error. Try again.' });
+    return res.status(500).json({ success: false, message: 'Server error. Try again later.' });
   }
 }
