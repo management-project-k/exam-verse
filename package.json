@@ -1,19 +1,4 @@
 {
-  "name": "exam-verse",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {
-    "@libsql/client": "^0.14.0",
-    "crypto": "builtin"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
-{
   "name": "exam-verse-api",
   "version": "1.0.0",
   "dependencies": {
