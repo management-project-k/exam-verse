@@ -1,9 +1,6 @@
 // api/register-student.js
-import { createClient } from '@libsql/client';
+import { createClient } from '@libsql/client/http';
 import crypto from 'crypto';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const client = createClient({
   url: process.env.TURSO_DATABASE_URL,
@@ -54,15 +51,15 @@ export default async function handler(req, res) {
 
   try {
     // Check for existing roll number or email
-    const checkQuery = `
-      SELECT RollNumber, Email
-      FROM Students
-      WHERE RollNumber = ? OR Email = ?
-    `;
-    const checkResult = await client.execute({
-      sql: checkQuery,
+    const checkQuery = {
+      sql: `
+        SELECT RollNumber, Email
+        FROM Students
+        WHERE RollNumber = ? OR Email = ?
+      `,
       args: [rollNumber, email],
-    });
+    };
+    const checkResult = await client.execute(checkQuery);
 
     if (checkResult.rows.length > 0) {
       const existing = checkResult.rows[0];
@@ -75,13 +72,12 @@ export default async function handler(req, res) {
     }
 
     // Insert new student
-    const insertQuery = `
-      INSERT INTO Students (
-        RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status, AccountCreated
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
-    `;
-    await client.execute({
-      sql: insertQuery,
+    const insertQuery = {
+      sql: `
+        INSERT INTO Students (
+          RollNumber, Name, Email, Phone, Password, Year, Semester, Department, College, Status, AccountCreated
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
+      `,
       args: [
         rollNumber,
         name,
@@ -93,14 +89,21 @@ export default async function handler(req, res) {
         department,
         college,
       ],
-    });
+    };
+    await client.execute(insertQuery);
 
     return res.status(200).json({
       success: true,
       message: 'Registration successful!',
     });
   } catch (error) {
-    console.error('Student register error:', error);
+    console.error('Student register error:', error);  // This will appear in Vercel logs
+    // Handle specific LibSQL errors
+    if (error.message.includes('401')) {
+      return res.status(500).json({ success: false, message: 'Database authentication failed. Contact admin.' });
+    } else if (error.message.includes('URL_INVALID')) {
+      return res.status(500).json({ success: false, message: 'Invalid database URL. Contact admin.' });
+    }
     return res.status(500).json({ success: false, message: 'Server error. Try again.' });
   }
 }
