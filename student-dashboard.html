@@ -1,2875 +1,2112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam-Verse | Student Dashboard</title>
-
-    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #1a73e8;
-            --dark-bg: #121212;
-            --dark-card: #2c2c2c;
-            --light-bg: #f5f5f5;
-            --light-card: #ffffff;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --text-muted: #666;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--light-bg);
-            color: #333;
-        }
-
-        body.dark {
-            background: var(--dark-bg);
-            color: #fff;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 60px;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 1000;
-            box-shadow: var(--shadow);
-        }
-
-        body.dark .header {
-            background: #1e1e1e;
-            border-color: #333;
-        }
-
-        .header-left {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .header-right {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .header-icon {
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            position: relative;
-        }
-
-        .header-icon:hover {
-            color: var(--primary);
-        }
-
-        .badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: #dc3545;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Main Content */
-        .main {
-            margin-top: 60px;
-            margin-bottom: 60px;
-            padding: 20px;
-            min-height: calc(100vh - 120px);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Cards */
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        body.dark .card {
-            background: var(--dark-card);
-        }
-
-        .welcome-card {
-            background: linear-gradient(135deg, #1a73e8, #5b9ef5);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .welcome-card h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: 0.3s;
-        }
-
-        body.dark .stat-card {
-            background: var(--dark-card);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-icon {
-            font-size: 32px;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        /* Charts */
-        .chart-container {
-            height: 300px;
-            margin-bottom: 20px;
-        }
-
-        /* Tests */
-        .search-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            font-family: 'Poppins';
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        body.dark .search-input {
-            background: #1e1e1e;
-            color: white;
-            border-color: #333;
-        }
-
-        .filters {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 10px 0;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--primary);
-            background: white;
-            color: var(--primary);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            white-space: nowrap;
-            transition: 0.2s;
-        }
-
-        .filter-btn:hover,
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .test-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--primary);
-            box-shadow: var(--shadow);
-            transition: 0.3s;
-        }
-
-        body.dark .test-card {
-            background: var(--dark-card);
-        }
-
-        .test-card:hover {
-            transform: translateX(5px);
-        }
-
-        .test-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .test-meta {
-            display: flex;
-            gap: 15px;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .test-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .test-btn:hover {
-            background: #1557b0;
-            transform: translateY(-2px);
-        }
-
-        /* Leaderboard */
-        .leaderboard-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            transition: 0.3s;
-        }
-
-        body.dark .leaderboard-row {
-            background: var(--dark-card);
-        }
-
-        .leaderboard-row:hover {
-            transform: translateX(5px);
-        }
-
-        .leaderboard-row.current {
-            background: rgba(26, 115, 232, 0.1);
-            border-left: 4px solid var(--primary);
-        }
-
-        .rank {
-            font-weight: 700;
-            font-size: 18px;
-            min-width: 50px;
-        }
-
-        .student-info {
-            flex: 1;
-            margin-left: 15px;
-        }
-
-        .student-name {
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-
-        .student-roll {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .score {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--primary);
-        }
-
-        /* Media Tabs */
-        .media-tabs {
-            display: flex;
-            justify-content: space-around;
-            background: white;
-            border-radius: 12px 12px 0 0;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            position: sticky;
-            top: 60px;
-            z-index: 100;
-        }
-
-        body.dark .media-tabs {
-            background: var(--dark-card);
-        }
-
-        .media-tab {
-            flex: 1;
-            padding: 15px 10px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 600;
-            border-bottom: 3px solid transparent;
-            transition: 0.3s;
-            color: #666;
-            font-size: 13px;
-        }
-
-        .media-tab i {
-            display: block;
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
-
-        .media-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        /* Feed View */
-        .media-section-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        body.dark .media-section-card {
-            background: var(--dark-card);
-        }
-
-        .media-search-wrapper {
-            position: relative;
-            margin-bottom: 15px;
-        }
-
-        .media-search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            color: var(--text-muted);
-        }
-
-        .media-search-input {
-            width: 100%;
-            padding: 12px 12px 12px 40px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        body.dark .media-search-input {
-            background: #1e1e1e;
-            border-color: #333;
-            color: #fff;
-        }
-
-        .stories-carousel {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            scroll-snap-type: x mandatory;
-        }
-
-        .story-item {
-            flex: 0 0 auto;
-            width: 70px;
-            text-align: center;
-            scroll-snap-align: start;
-        }
-
-        .story-avatar-wrapper {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            padding: 3px;
-            margin: 0 auto 6px;
-            border: 3px solid var(--primary);
-            position: relative;
-        }
-
-        .story-avatar-wrapper.viewed {
-            border-color: #ccc;
-        }
-
-        .story-avatar-wrapper .story-plus {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: var(--primary);
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 14px;
-            line-height: 20px;
-            text-align: center;
-        }
-
-        .story-avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #eee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: var(--primary);
-            overflow: hidden;
-        }
-
-        body.dark .story-avatar {
-            background: #1e1e1e;
-        }
-
-        .story-name {
-            font-size: 11px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .post-composer {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        body.dark .post-composer {
-            background: var(--dark-card);
-        }
-
-        .composer-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            gap: 10px;
-        }
-
-        .composer-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .composer-meta {
-            font-size: 13px;
-        }
-
-        .composer-meta .name {
-            font-weight: 600;
-        }
-
-        .composer-textarea {
-            width: 100%;
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 12px;
-            border-radius: 8px;
-            font-family: 'Poppins';
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
-            margin-bottom: 12px;
-            background: #f9f9f9;
-        }
-
-        body.dark .composer-textarea {
-            background: #1e1e1e;
-            color: white;
-            border-color: #333;
-        }
-
-        .composer-footer {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .post-icon {
-            font-size: 20px;
-            cursor: pointer;
-            color: #666;
-            transition: transform 0.2s, color 0.2s;
-        }
-
-        .post-icon:hover {
-            color: var(--primary);
-            transform: scale(1.1);
-        }
-
-        .post-btn {
-            margin-left: auto;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .post-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .post-feed {
-            list-style: none;
-        }
-
-        .post-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-        }
-
-        body.dark .post-card {
-            background: var(--dark-card);
-        }
-
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .post-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            margin-right: 12px;
-        }
-
-        .post-author {
-            flex: 1;
-        }
-
-        .post-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .post-roll {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .post-time {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .post-options {
-            cursor: pointer;
-            color: #999;
-            font-size: 18px;
-            margin-left: 8px;
-        }
-
-        .post-text {
-            margin-bottom: 12px;
-            line-height: 1.5;
-            font-size: 14px;
-        }
-
-        .post-carousel {
-            position: relative;
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            scroll-snap-type: x mandatory;
-            margin-bottom: 12px;
-        }
-
-        .post-carousel img {
-            max-height: 300px;
-            width: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-            scroll-snap-align: start;
-        }
-
-        .post-pagination {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .post-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ccc;
-        }
-
-        .post-dot.active {
-            background: var(--primary);
-        }
-
-        .post-stats {
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
-        }
-
-        .post-stats span {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
-        }
-
-        .post-stats span:hover {
-            color: var(--primary);
-        }
-
-        .post-comments {
-            border-top: 1px solid rgba(0,0,0,0.08);
-            padding-top: 12px;
-        }
-
-        .view-comments {
-            color: var(--primary);
-            font-size: 13px;
-            cursor: pointer;
-            margin-bottom: 12px;
-            display: inline-block;
-        }
-
-        .comment-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .comment-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        .comment-body {
-            flex: 1;
-        }
-
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .comment-time {
-            font-weight: 400;
-            color: #999;
-        }
-
-        .comment-text {
-            font-size: 13px;
-            color: inherit;
-        }
-
-        .comment-input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            border: 1px solid #e0e0e0;
-            border-radius: 20px;
-            padding: 6px 12px;
-        }
-
-        body.dark .comment-input-wrapper {
-            border-color: #333;
-        }
-
-        .comment-input-wrapper input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 13px;
-            background: transparent;
-            color: inherit;
-        }
-
-        /* Stories Viewer */
-        .story-viewer {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            display: none;
-            flex-direction: column;
-            z-index: 9999;
-            color: #fff;
-        }
-
-        .story-viewer.active {
-            display: flex;
-        }
-
-        .story-progress {
-            display: flex;
-            gap: 5px;
-            padding: 16px;
-            margin-top: env(safe-area-inset-top, 0);
-        }
-
-        .story-progress-bar {
-            flex: 1;
-            height: 3px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 999px;
-            overflow: hidden;
-        }
-
-        .story-progress-fill {
-            height: 100%;
-            width: 0%;
-            background: white;
-        }
-
-        .story-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-        }
-
-        .story-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .story-author-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .story-main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .story-media {
-            max-width: 100%;
-            max-height: 80vh;
-            border-radius: 12px;
-            object-fit: contain;
-        }
-
-        .story-reply {
-            width: 90%;
-            margin: 0 auto 30px;
-            position: relative;
-        }
-
-        .story-reply input {
-            width: 100%;
-            padding: 12px 60px 12px 16px;
-            border-radius: 24px;
-            border: none;
-            background: rgba(255,255,255,0.85);
-            font-size: 14px;
-        }
-
-        .story-reply button {
-            position: absolute;
-            right: 8px;
-            top: 6px;
-            bottom: 6px;
-            padding: 0 16px;
-            border-radius: 20px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Chats */
-        .chats-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .chat-search-wrapper {
-            position: relative;
-            margin-bottom: 12px;
-        }
-
-        .chat-search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            color: var(--text-muted);
-        }
-
-        .chat-search-input {
-            width: 100%;
-            padding: 12px 12px 12px 40px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        body.dark .chat-search-input {
-            background: #1e1e1e;
-            border-color: #333;
-            color: #fff;
-        }
-
-        .chat-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .chat-item {
-            display: flex;
-            gap: 12px;
-            padding: 15px;
-            border-radius: 12px;
-            background: white;
-            align-items: center;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .chat-item:hover {
-            background: #f5f5f5;
-        }
-
-        .chat-item.active {
-            border: 2px solid rgba(26,115,232,0.2);
-        }
-
-        body.dark .chat-item {
-            background: var(--dark-card);
-        }
-
-        body.dark .chat-item:hover {
-            background: #333333;
-        }
-
-        .chat-avatar {
-            position: relative;
-        }
-
-        .chat-avatar .avatar-circle {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .online-indicator {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #28a745;
-            border: 2px solid white;
-        }
-
-        .chat-info {
-            flex: 1;
-        }
-
-        .chat-top {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .chat-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .chat-time {
-            font-size: 11px;
-            color: #999;
-        }
-
-        .chat-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-preview {
-            font-size: 13px;
-            color: #666;
-            max-width: 180px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-unread {
-            background: var(--primary);
-            color: white;
-            font-size: 11px;
-            padding: 3px 7px;
-            border-radius: 999px;
-            font-weight: 600;
-        }
-
-        .conversation-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            min-height: 400px;
-        }
-
-        body.dark .conversation-card {
-            background: var(--dark-card);
-        }
-
-        .conversation-header {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            padding: 15px;
-            gap: 12px;
-        }
-
-        .conversation-header .back-btn {
-            font-size: 22px;
-            cursor: pointer;
-            display: none;
-        }
-
-        .conversation-title {
-            flex: 1;
-        }
-
-        .conversation-title .name {
-            font-weight: 600;
-        }
-
-        .conversation-title .status {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .conversation-actions {
-            display: flex;
-            gap: 12px;
-            font-size: 20px;
-            color: #666;
-        }
-
-        .messages-area {
-            flex: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            overflow-y: auto;
-        }
-
-        .message-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: 75%;
-        }
-
-        .message-wrapper.sent {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-
-        .message-bubble {
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.4;
-            background: #e5e5ea;
-            color: #000;
-            position: relative;
-        }
-
-        .message-wrapper.sent .message-bubble {
-            background: var(--primary);
-            color: white;
-        }
-
-        .message-meta {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-            color: #999;
-            margin-top: 4px;
-            align-items: center;
-        }
-
-        .message-status {
-            font-size: 12px;
-        }
-
-        .composer-input {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            border-top: 1px solid rgba(0,0,0,0.08);
-        }
-
-        .composer-input textarea {
-            flex: 1;
-            border: none;
-            resize: none;
-            font-size: 14px;
-            line-height: 1.4;
-            max-height: 120px;
-            min-height: 40px;
-            background: transparent;
-            color: inherit;
-        }
-
-        .composer-input textarea:focus {
-            outline: none;
-        }
-
-        .composer-actions i {
-            font-size: 22px;
-            color: #666;
-            cursor: pointer;
-        }
-
-        .send-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 999px;
-            padding: 10px 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Groups */
-        .groups-search-wrapper {
-            position: relative;
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .groups-search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            color: var(--text-muted);
-        }
-
-        .groups-search-input {
-            flex: 1;
-            padding: 12px 12px 12px 40px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        body.dark .groups-search-input {
-            background: #1e1e1e;
-            border-color: #333;
-            color: #fff;
-        }
-
-        .new-group-btn {
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px dashed var(--primary);
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            background: rgba(26,115,232,0.08);
-            transition: background 0.2s;
-        }
-
-        .new-group-btn:hover {
-            background: rgba(26,115,232,0.15);
-        }
-
-        .groups-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .group-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .group-card:hover {
-            transform: translateY(-4px);
-        }
-
-        body.dark .group-card {
-            background: var(--dark-card);
-        }
-
-        .group-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(26,115,232,0.2), rgba(26,115,232,0.4));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-
-        .group-content {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .group-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .group-name {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .group-meta {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .group-description {
-            font-size: 13px;
-            font-style: italic;
-            color: #555;
-        }
-
-        .group-last-message {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #666;
-            align-items: center;
-        }
-
-        .group-unread {
-            background: var(--primary);
-            color: white;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        body.dark .group-description,
-        body.dark .group-meta,
-        body.dark .group-last-message {
-            color: #bbb;
-        }
-
-        /* Profile */
-        .profile-header {
-            background: linear-gradient(135deg, #1a73e8, #5b9ef5);
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .profile-avatar-large {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: white;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            font-weight: 700;
-            margin: 0 auto 20px;
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .profile-roll {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .profile-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .profile-stat {
-            background: white;
-            padding: 15px 10px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: var(--shadow);
-        }
-
-        body.dark .profile-stat {
-            background: var(--dark-card);
-        }
-
-        .profile-stat-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        .profile-stat-label {
-            font-size: 10px;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #c62828;
-            transform: translateY(-2px);
-        }
-
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-around;
-            height: 60px;
-            z-index: 999;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        }
-
-        body.dark .bottom-nav {
-            background: #1e1e1e;
-            border-color: #333;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            cursor: pointer;
-            color: #666;
-            transition: 0.3s;
-            font-size: 11px;
-            gap: 4px;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        .nav-icon {
-            font-size: 24px;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-size: 12px;
-            margin-top: 40px;
-        }
-
-        .footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Loaders */
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 3px solid rgba(26,115,232,0.2);
-            border-top-color: var(--primary);
-            animation: spin 0.8s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #888;
-            padding: 40px 20px;
-        }
-
-        body.dark .empty-state {
-            color: #aaa;
-        }
-
-        @media (min-width: 900px) {
-            .chats-container {
-                grid-template-columns: 320px 1fr;
-            }
-            .conversation-header .back-btn {
-                display: none !important;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .profile-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .chats-container {
-                grid-template-columns: 1fr;
-            }
-            .conversation-card.hidden-mobile {
-                display: none;
-            }
-            .conversation-header .back-btn {
-                display: block;
-            }
-            .groups-list {
-                gap: 12px;
-            }
-            .group-card {
-                grid-template-columns: auto 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Exam Verse | Student Dashboard</title>
+
+  <!-- Icons + Fonts -->
+  <link
+    rel="stylesheet"
+    href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+  />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #1a73e8;
+      --dark-bg: #181818;
+      --dark-card: #2c2c2c;
+      --light-bg: #f5f5f5;
+      --light-card: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --text-muted: #666;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: var(--light-bg);
+      color: #333;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    body.dark {
+      background: var(--dark-bg);
+      color: #fff;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 60px;
+      background: var(--light-card);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+    }
+
+    body.dark .header {
+      background: #1e1e1e;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-row {
+      display: flex;
+      gap: 4px;
+      align-items: baseline;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      text-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+    }
+
+    .version-capsule {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(26, 115, 232, 0.1);
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      border-radius: 999px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon-wrapper {
+      position: relative;
+    }
+
+    .header-icon {
+      font-size: 22px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s;
+    }
+
+    .header-icon:hover {
+      color: var(--primary);
+    }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -6px;
+      background: #dc3545;
+      color: #fff;
+      border-radius: 999px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      border: none;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      background: none;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(26, 115, 232, 0.08);
+      transform: scale(1.05);
+    }
+
+    .theme-icon {
+      width: 22px;
+      height: 22px;
+      position: absolute;
+      transition: all 0.35s ease;
+      color: var(--primary);
+    }
+
+    .sun-icon {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+
+    body.dark .sun-icon {
+      opacity: 0;
+      transform: rotate(180deg) scale(0.5);
+    }
+
+    .moon-icon {
+      opacity: 0;
+      transform: rotate(-180deg) scale(0.5);
+    }
+
+    body.dark .moon-icon {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+
+    /* Layout */
+    .main {
+      margin-top: 60px;
+      margin-bottom: 60px;
+      padding: 16px;
+      min-height: calc(100vh - 120px);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      background: var(--light-card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    body.dark .card {
+      background: var(--dark-card);
+    }
+
+    /* Welcome card */
+    .welcome-card {
+      background: linear-gradient(135deg, #1a73e8, #5b9ef5);
+      color: #fff;
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .welcome-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .welcome-title {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .welcome-roll {
+      font-size: 13px;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .welcome-roll i {
+      font-size: 16px;
+    }
+
+    .welcome-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    /* Stats grids */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .stat-card {
+      background: var(--light-card);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: transform 0.2s;
+    }
+
+    body.dark .stat-card {
+      background: var(--dark-card);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+    }
+
+    .stat-icon {
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Mini analytics */
+    .mini-analytics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .mini-analytics {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+    }
+
+    .mini-card {
+      background: var(--light-card);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    body.dark .mini-card {
+      background: var(--dark-card);
+    }
+
+    .mini-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: rgba(26, 115, 232, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 16px;
+    }
+
+    .mini-content {
+      flex: 1;
+    }
+
+    .mini-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mini-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Charts */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .chart-container {
+      height: 260px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chart-title i {
+      color: var(--primary);
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--light-card);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 1000;
+    }
+
+    body.dark .bottom-nav {
+      background: #1e1e1e;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      cursor: pointer;
+      padding-top: 4px;
+      background: none;
+      border: none;
+    }
+
+    .nav-item i {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-item.active i {
+      color: var(--primary);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Tests tab */
+    .tests-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .tests-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .tests-search-row {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tests-search-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .tests-search-wrapper i {
+      position: absolute;
+      left: 12px;
+      top: 11px;
+      color: var(--text-muted);
+    }
+
+    .tests-search-input {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      border-radius: 10px;
+      border: 2px solid rgba(0, 0, 0, 0.08);
+      font-size: 14px;
+      font-family: "Poppins", sans-serif;
+      background: #f9f9f9;
+    }
+
+    body.dark .tests-search-input {
+      background: #1e1e1e;
+      border-color: #333;
+      color: #fff;
+    }
+
+    .tests-quick-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tests-chip {
+      border-radius: 999px;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tests-chip i {
+      font-size: 14px;
+    }
+
+    .tests-chip:hover,
+    .tests-chip.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .tests-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .tests-section-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tests-section-header p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .tests-view-all {
+      border: none;
+      background: rgba(26, 115, 232, 0.08);
+      color: var(--primary);
+      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .tests-view-all i {
+      font-size: 14px;
+    }
+
+    .tests-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .test-card {
+      background: var(--light-card);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 3px solid var(--primary);
+    }
+
+    body.dark .test-card {
+      background: var(--dark-card);
+    }
+
+    .test-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .test-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .test-id {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .test-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .test-meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .test-meta-pill i {
+      font-size: 13px;
+    }
+
+    .test-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    .test-difficulty-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .test-difficulty-easy {
+      background: rgba(52, 199, 89, 0.12);
+      color: #34c759;
+    }
+
+    .test-difficulty-medium {
+      background: rgba(251, 188, 5, 0.12);
+      color: #fbbc05;
+    }
+
+    .test-difficulty-hard {
+      background: rgba(234, 67, 53, 0.12);
+      color: #ea4335;
+    }
+
+    .test-btn-primary {
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .test-btn-primary i {
+      font-size: 14px;
+    }
+
+    .tests-empty {
+      align-items: center;
+      text-align: center;
+      border-left: none;
+    }
+
+    .tests-empty-icon {
+      font-size: 24px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .tests-empty-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .profile-title {
+      margin-bottom: 10px;
+    }
+
+    .profile-logout-button {
+      margin-top: 12px;
+    }
+  </style>
 </head>
 <body>
-
-    <!-- FIXED HEADER -->
-    <header class="header">
-        <div class="header-left">EXAM-VERSE</div>
-        <div class="header-right">
-            <div class="header-icon" onclick="showNotifications()" title="Notifications">
-                <i class="las la-bell"></i>
-                <span class="badge">3</span>
-            </div>
-            <div class="header-icon" onclick="toggleTheme()" title="Toggle Theme">
-                <i class="las la-moon" id="themeIcon"></i>
-            </div>
-            <div class="avatar" onclick="switchTab('profile')">
-                <span id="userInitial">A</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="main">
-
-        <!-- HOME TAB -->
-        <div id="homeTab" class="tab-content active">
-            <div class="welcome-card">
-                <h2>Welcome, <span id="userName">Aaradhya</span>!</h2>
-                <p>Roll: <span id="userRoll">230022-CM-032</span></p>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="las la-clipboard-list stat-icon"></i>
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Tests Taken</div>
-                </div>
-                <div class="stat-card">
-                    <i class="las la-chart-bar stat-icon"></i>
-                    <div class="stat-value">82.5%</div>
-                    <div class="stat-label">Avg Score</div>
-                </div>
-                <div class="stat-card">
-                    <i class="las la-trophy stat-icon"></i>
-                    <div class="stat-value">#15</div>
-                    <div class="stat-label">Your Rank</div>
-                </div>
-                <div class="stat-card">
-                    <i class="las la-bullseye stat-icon"></i>
-                    <div class="stat-value">82%</div>
-                    <div class="stat-label">Accuracy</div>
-                </div>
-            </div>
-
-            <div class="card chart-container">
-                <canvas id="scoreChart"></canvas>
-            </div>
-
-            <div class="card chart-container">
-                <canvas id="subjectChart"></canvas>
-            </div>
-
-            <div class="footer">
-                Designed & Developed by <a href="https://project-k.co.in" target="_blank">Project K</a>
-            </div>
-        </div>
-
-        <!-- TESTS TAB -->
-        <div id="testsTab" class="tab-content">
-            <div class="card">
-                <div style="position:relative">
-                    <i class="las la-search" style="position:absolute;left:12px;top:12px;color:#666"></i>
-                    <input type="text" class="search-input" style="padding-left:40px" placeholder="Search tests..." id="testSearch" onkeyup="searchTests()">
-                </div>
-                <div class="filters">
-                    <button class="filter-btn active" onclick="filterTests('all')">All</button>
-                    <button class="filter-btn" onclick="filterTests('easy')">Easy</button>
-                    <button class="filter-btn" onclick="filterTests('medium')">Medium</button>
-                    <button class="filter-btn" onclick="filterTests('hard')">Hard</button>
-                </div>
-            </div>
-
-            <div id="testsList">
-                <div class="test-card">
-                    <div class="test-title"><i class="las la-book"></i> Operating Systems - Process Management</div>
-                    <div class="test-meta">
-                        <span><i class="las la-list"></i> 25 questions</span>
-                        <span><i class="las la-clock"></i> 30 min</span>
-                        <span><i class="las la-signal"></i> Medium</span>
-                    </div>
-                    <button class="test-btn" onclick="startTest('test-1')">Start Test <i class="las la-arrow-right"></i></button>
-                </div>
-                <div class="test-card">
-                    <div class="test-title"><i class="las la-database"></i> DBMS - Normalization</div>
-                    <div class="test-meta">
-                        <span><i class="las la-list"></i> 30 questions</span>
-                        <span><i class="las la-clock"></i> 40 min</span>
-                        <span><i class="las la-signal"></i> Hard</span>
-                    </div>
-                    <button class="test-btn" onclick="startTest('test-2')">Start Test <i class="las la-arrow-right"></i></button>
-                </div>
-            </div>
-
-            <div class="footer">
-                Designed & Developed by <a href="https://project-k.co.in" target="_blank">Project K</a>
-            </div>
-        </div>
-
-        <!-- LEADERBOARD TAB -->
-        <div id="leaderboardTab" class="tab-content">
-            <div class="leaderboard-row">
-                <div class="rank">1st</div>
-                <div class="student-info">
-                    <div class="student-name">Priya Sharma</div>
-                    <div class="student-roll">23001-CM-001</div>
-                </div>
-                <div class="score">95%</div>
-            </div>
-            <div class="leaderboard-row">
-                <div class="rank">2nd</div>
-                <div class="student-info">
-                    <div class="student-name">Rohan Kumar</div>
-                    <div class="student-roll">23002-CM-002</div>
-                </div>
-                <div class="score">92%</div>
-            </div>
-            <div class="leaderboard-row current">
-                <div class="rank">#15</div>
-                <div class="student-info">
-                    <div class="student-name">⭐ You (Aaradhya)</div>
-                    <div class="student-roll">230022-CM-032</div>
-                </div>
-                <div class="score">82.5%</div>
-            </div>
-
-            <div class="footer">
-                Designed & Developed by <a href="https://project-k.co.in" target="_blank">Project K</a>
-            </div>
-        </div>
-
-        <!-- MEDIA TAB -->
-        <div id="mediaTab" class="tab-content">
-            <div class="media-tabs">
-                <div class="media-tab active" data-tab="feed" onclick="switchMediaTab(event, 'feed')">
-                    <i class="las la-home"></i> Feed
-                </div>
-                <div class="media-tab" data-tab="stories" onclick="switchMediaTab(event, 'stories')">
-                    <i class="las la-fire"></i> Stories
-                </div>
-                <div class="media-tab" data-tab="chats" onclick="switchMediaTab(event, 'chats')">
-                    <i class="las la-comments"></i> Chats
-                </div>
-                <div class="media-tab" data-tab="groups" onclick="switchMediaTab(event, 'groups')">
-                    <i class="las la-users"></i> Groups
-                </div>
-            </div>
-
-            <!-- FEED VIEW -->
-            <section id="feedView" class="media-view">
-                <div class="media-section-card">
-                    <div class="media-search-wrapper">
-                        <i class="las la-search"></i>
-                        <input type="text" class="media-search-input" placeholder="Search students, posts, hashtags..." id="mediaSearchInput" onkeyup="handleMediaSearch(event)">
-                    </div>
-                </div>
-
-                <div class="media-section-card">
-                    <div class="stories-carousel" id="storiesCarousel">
-                        <!-- Story items injected here -->
-                    </div>
-                </div>
-
-                <div class="post-composer">
-                    <div class="composer-header">
-                        <div class="composer-avatar" id="composerAvatar">A</div>
-                        <div class="composer-meta">
-                            <div class="name" id="composerName">Aaradhya</div>
-                            <div class="roll" id="composerRoll">230022-CM-032</div>
-                        </div>
-                    </div>
-                    <textarea class="composer-textarea" placeholder="What's on your mind?" id="postInput" oninput="togglePostButton()"></textarea>
-                    <div class="composer-footer">
-                        <label class="post-icon">
-                            <i class="las la-image"></i>
-                            <input type="file" id="postImagesInput" accept="image/*" multiple style="display:none" onchange="handlePostImages(event)">
-                        </label>
-                        <i class="post-icon las la-smile" title="Emoji"></i>
-                        <i class="post-icon las la-user-tag" title="Tag classmates"></i>
-                        <i class="post-icon las la-hashtag" title="Add hashtags"></i>
-                        <button class="post-btn" id="postButton" onclick="createPost()" disabled>Post</button>
-                    </div>
-                    <div id="selectedImagesPreview" style="display:none;margin-top:12px;gap:8px;flex-wrap:wrap"></div>
-                </div>
-
-                <ul class="post-feed" id="feedList"></ul>
-                <div id="feedLoading" class="spinner" style="display:none"></div>
-                <div id="feedEndMessage" class="empty-state" style="display:none">You’ve reached the end of the feed 🎉</div>
-            </section>
-
-            <!-- STORIES VIEW -->
-            <section id="storiesView" class="media-view" style="display:none">
-                <div class="media-section-card">
-                    <h3 style="margin-bottom:15px;">Your Stories</h3>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div class="story-avatar-wrapper">
-                            <div class="story-avatar">A</div>
-                            <div class="story-plus">+</div>
-                        </div>
-                        <div style="flex:1">
-                            <p style="font-size:13px;color:#666;margin-bottom:4px;">
-                                Share a quick update that disappears in 24 hours.
-                            </p>
-                            <label style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;background:rgba(26,115,232,0.1);cursor:pointer;color:var(--primary);font-weight:600;">
-                                <i class="las la-camera"></i> Add to Story
-                                <input type="file" id="uploadStoryInput" accept="image/*" style="display:none" onchange="uploadStory(event)">
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="media-section-card">
-                    <h3 style="margin-bottom:15px;">All Stories</h3>
-                    <div class="stories-carousel" id="storiesList">
-                        <!-- Populated via JS -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- CHATS VIEW -->
-            <section id="chatsView" class="media-view" style="display:none">
-                <div class="media-section-card">
-                    <div class="chat-search-wrapper">
-                        <i class="las la-search"></i>
-                        <input type="text" class="chat-search-input" placeholder="Search chats..." onkeyup="filterChats(event)">
-                    </div>
-                    <div class="chats-container">
-                        <div class="chat-list" id="chatList">
-                            <!-- Chat items injected via JS -->
-                        </div>
-                        <div class="conversation-card hidden-mobile" id="conversationCard">
-                            <div class="conversation-header">
-                                <i class="las la-arrow-left back-btn" onclick="closeConversation()"></i>
-                                <div class="chat-avatar">
-                                    <div class="avatar-circle" id="conversationAvatar">P</div>
-                                    <div class="online-indicator" id="conversationOnlineIndicator" style="display:none"></div>
-                                </div>
-                                <div class="conversation-title">
-                                    <div class="name" id="conversationName">Select a chat</div>
-                                    <div class="status" id="conversationStatus">Messages will appear here</div>
-                                </div>
-                                <div class="conversation-actions">
-                                    <i class="las la-search"></i>
-                                    <i class="las la-ellipsis-v"></i>
-                                </div>
-                            </div>
-                            <div class="messages-area" id="messagesArea">
-                                <div class="empty-state">Choose a conversation to start chatting 📬</div>
-                            </div>
-                            <div class="composer-input">
-                                <textarea id="messageInput" placeholder="Type a message..." rows="1" disabled></textarea>
-                                <div class="composer-actions">
-                                    <i class="las la-smile"></i>
-                                    <i class="las la-paperclip"></i>
-                                    <i class="las la-microphone"></i>
-                                </div>
-                                <button class="send-btn" onclick="sendMessage()" id="sendMessageBtn" disabled>Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- GROUPS VIEW -->
-            <section id="groupsView" class="media-view" style="display:none">
-                <div class="media-section-card">
-                    <div class="groups-search-wrapper">
-                        <i class="las la-search"></i>
-                        <input type="text" class="groups-search-input" placeholder="Search groups..." onkeyup="filterGroups(event)">
-                        <button class="new-group-btn" onclick="openCreateGroupModal()"><i class="las la-plus"></i> New Group</button>
-                    </div>
-                </div>
-                <div class="groups-list" id="groupsList">
-                    <!-- Group cards injected via JS -->
-                </div>
-                <div class="empty-state" id="groupsEmptyState" style="display:none">
-                    You’re not in any groups yet. Create or join one to collaborate!
-                </div>
-            </section>
-
-            <div class="footer">
-                Designed & Developed by <a href="https://project-k.co.in" target="_blank">Project K</a>
-            </div>
-        </div>
-
-        <!-- PROFILE TAB -->
-        <div id="profileTab" class="tab-content">
-            <div class="profile-header">
-                <div class="profile-avatar-large">A</div>
-                <div class="profile-name">Aaradhya</div>
-                <div class="profile-roll">230022-CM-032</div>
-                <div style="margin-top:10px;font-size:13px">2nd Year - Semester 3 - CSE</div>
-            </div>
-
-            <div class="profile-stats">
-                <div class="profile-stat">
-                    <div class="profile-stat-value">12</div>
-                    <div class="profile-stat-label">Tests</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-value">82.5%</div>
-                    <div class="profile-stat-label">Score</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-value">#15</div>
-                    <div class="profile-stat-label">Rank</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-value">8</div>
-                    <div class="profile-stat-label">Badges</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3><i class="las la-user-circle"></i> Personal Information</h3>
-                <p><i class="las la-envelope"></i> aaradhya@college.edu.in</p>
-                <p><i class="las la-phone"></i> +91 9876543210</p>
-            </div>
-
-            <div class="card">
-                <button class="logout-btn" onclick="logout()"><i class="las la-sign-out-alt"></i> LOGOUT</button>
-            </div>
-
-            <div class="footer">
-                Designed & Developed by <a href="https://project-k.co.in" target="_blank">Project K</a>
-            </div>
-        </div>
-    </main>
-
-    <!-- STORY VIEWER MODAL -->
-    <div class="story-viewer" id="storyViewer">
-        <div class="story-progress" id="storyProgress"></div>
-        <div class="story-header">
-            <div class="story-header-left">
-                <div class="story-author-avatar" id="storyAuthorAvatar">P</div>
-                <div>
-                    <div id="storyAuthorName" style="font-weight:600;">Priya Sharma</div>
-                    <div id="storyTime" style="font-size:12px;color:#ccc;">2h ago</div>
-                </div>
-            </div>
-            <div>
-                <i class="las la-times" style="font-size:28px;cursor:pointer" onclick="closeStoryViewer()"></i>
-            </div>
-        </div>
-        <div class="story-main" id="storyMain">
-            <!-- Image/Video injected here -->
-        </div>
-        <div class="story-reply">
-            <input type="text" id="storyReplyInput" placeholder="Reply to story..." onkeyup="handleStoryReplyKey(event)">
-            <button onclick="sendStoryReply()">Send</button>
-        </div>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-row">
+        <span class="brand-title">Exam</span>
+        <span class="brand-title">Verse</span>
+      </div>
+      <span class="version-capsule">Version 1.0</span>
     </div>
+    <div class="header-right">
+      <div class="header-icon-wrapper">
+        <button
+          id="notificationButton"
+          class="icon-button"
+          type="button"
+          aria-label="Open notifications"
+          style="background:none;border:none;padding:0;"
+        >
+          <i class="las la-bell header-icon" aria-hidden="true"></i>
+          <span class="badge" id="notificationBadge">3</span>
+        </button>
+      </div>
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('home')">
-            <i class="las la-home nav-icon"></i>
-            <span>Home</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('tests')">
-            <i class="las la-file-alt nav-icon"></i>
-            <span>Tests</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('leaderboard')">
-            <i class="las la-trophy nav-icon"></i>
-            <span>Rank</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('media')">
-            <i class="las la-comments nav-icon"></i>
-            <span>Media</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('profile')">
-            <i class="las la-user nav-icon"></i>
-            <span>Profile</span>
-        </div>
-    </nav>
+      <button
+        id="themeToggleButton"
+        class="theme-toggle"
+        type="button"
+        aria-label="Toggle theme"
+      >
+        <svg
+          class="theme-icon sun-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg
+          class="theme-icon moon-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+          />
+        </svg>
+      </button>
 
-    <script>
-        let isDark = localStorage.getItem('theme') === 'dark';
-        let scoreChart, subjectChart;
+      <button
+        id="profileAvatarButton"
+        class="avatar"
+        type="button"
+        aria-label="Open profile tab"
+      >
+        <span id="userInitial">S</span>
+      </button>
+    </div>
+  </header>
 
-        /* ---------------------- GLOBAL INIT ---------------------- */
-        const currentUser = {
-            rollNumber: '230022-CM-032',
-            name: 'Aaradhya',
-            initials: 'A'
-        };
+  <!-- MAIN -->
+  <main class="main">
+    <!-- HOME TAB -->
+    <section
+      id="homeTab"
+      class="tab-content active"
+      role="tabpanel"
+      aria-labelledby="tab-home"
+      tabindex="0"
+    >
+      <div class="welcome-card">
+        <div class="welcome-main">
+          <div class="welcome-title">
+            Welcome, <span id="userName">Student</span>!
+          </div>
+          <div class="welcome-roll">
+            <i class="las la-id-card" aria-hidden="true"></i>
+            <span id="userRoll">RollNumber</span>
+          </div>
+        </div>
+        <div class="welcome-icon" aria-hidden="true">
+          <i class="las la-graduation-cap"></i>
+        </div>
+      </div>
 
-        const mediaState = {
-            feedPage: 1,
-            feedHasMore: true,
-            feedLoading: false,
-            viewedStories: new Set(),
-            currentStoryIndex: 0,
-            currentStorySet: [],
-            conversations: [],
-            activeChatId: null,
-            activeChatName: '',
-            activeChatRoll: '',
-            groups: [],
-            feedObserver: null
-        };
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Total Tests</span>
+            <i class="las la-clipboard-list stat-icon" aria-hidden="true"></i>
+          </div>
+          <div class="stat-value" id="statTestsCompleted">0</div>
+          <div class="stat-sub">Completed</div>
+        </div>
 
-        window.addEventListener('load', () => {
-            if (isDark) {
-                document.body.classList.add('dark');
-                document.getElementById('themeIcon').className = 'las la-sun';
-            }
-            renderCharts();
-            preloadMediaTab();
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Average Score</span>
+            <i class="las la-chart-bar stat-icon" aria-hidden="true"></i>
+          </div>
+          <div class="stat-value" id="statAverageScore">0.0</div>
+          <div class="stat-sub">Overall</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Global Rank</span>
+            <i class="las la-trophy stat-icon" aria-hidden="true"></i>
+          </div>
+          <div class="stat-value" id="statGlobalRank">--</div>
+          <div class="stat-sub">Leaderboard</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span>Answer Accuracy</span>
+            <i class="las la-bullseye stat-icon" aria-hidden="true"></i>
+          </div>
+          <div class="stat-value" id="statAnswerAccuracy">0</div>
+          <div class="stat-sub">Correct answers</div>
+        </div>
+      </div>
+
+      <div class="mini-analytics">
+        <div class="mini-card">
+          <div class="mini-icon" aria-hidden="true">
+            <i class="las la-star"></i>
+          </div>
+          <div class="mini-content">
+            <div class="mini-label">Best Score</div>
+            <div class="mini-value" id="miniBestScoreValue">0</div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-icon" aria-hidden="true">
+            <i class="las la-bolt"></i>
+          </div>
+          <div class="mini-content">
+            <div class="mini-label">Last Test</div>
+            <div class="mini-value" id="miniLastTestScore">0</div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-icon" aria-hidden="true">
+            <i class="las la-fire"></i>
+          </div>
+          <div class="mini-content">
+            <div class="mini-label">Daily Streak</div>
+            <div class="mini-value" id="miniDailyStreak">0 days</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="card">
+          <div class="chart-title">
+            <i class="las la-wave-square" aria-hidden="true"></i>
+            <span>Recent Test Scores</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="recentScoresChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="chart-title">
+            <i class="las la-sitemap" aria-hidden="true"></i>
+            <span>Test Difficulty Distribution</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="difficultyDistributionChartCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="chart-title">
+          <i class="las la-layer-group" aria-hidden="true"></i>
+          <span>Subject Performance</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="subjectPerformanceChartCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="footer">
+        Designed &amp; Developed by
+        <a
+          href="https://www.project-k.co.in"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Project K</a
+        >
+      </div>
+    </section>
+
+    <!-- TESTS TAB -->
+    <section
+      id="testsTab"
+      class="tab-content"
+      role="tabpanel"
+      aria-labelledby="tab-tests"
+      tabindex="0"
+    >
+      <div class="card">
+        <div class="tests-header">
+          <h3>Mock Tests</h3>
+          <span class="tests-subtitle"
+            >Plan, attempt, and review your exams in one place.</span
+          >
+        </div>
+
+        <div class="tests-search-row">
+          <div class="tests-search-wrapper">
+            <i class="las la-search" aria-hidden="true"></i>
+            <input
+              type="text"
+              id="testSearchInput"
+              class="tests-search-input"
+              placeholder="Search by test name, subject, or ID..."
+              autocomplete="off"
+              aria-label="Search tests by name, subject, or ID"
+            />
+          </div>
+
+          <div
+            class="tests-quick-filters"
+            aria-label="Difficulty filters"
+          >
+            <button
+              class="tests-chip active"
+              type="button"
+              data-filter="all"
+            >
+              <i class="las la-layer-group" aria-hidden="true"></i>
+              <span>All</span>
+            </button>
+            <button
+              class="tests-chip"
+              type="button"
+              data-filter="easy"
+            >
+              <i class="las la-smile" aria-hidden="true"></i>
+              <span>Easy</span>
+            </button>
+            <button
+              class="tests-chip"
+              type="button"
+              data-filter="medium"
+            >
+              <i class="las la-adjust" aria-hidden="true"></i>
+              <span>Medium</span>
+            </button>
+            <button
+              class="tests-chip"
+              type="button"
+              data-filter="hard"
+            >
+              <i class="las la-fire" aria-hidden="true"></i>
+              <span>Hard</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tests-section-header">
+          <div>
+            <h4>Upcoming Tests</h4>
+            <p id="upcomingSubtitle">Ready to attempt.</p>
+          </div>
+          <button
+            id="reloadTestsButton"
+            class="tests-view-all"
+            type="button"
+          >
+            <i class="las la-sync-alt" aria-hidden="true"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+        <div id="upcomingTestsList" class="tests-list">
+          <div
+            class="test-card tests-empty"
+            id="upcomingEmptyStateCard"
+          >
+            <div class="tests-empty-icon" aria-hidden="true">
+              <i class="las la-inbox"></i>
+            </div>
+            <div class="tests-empty-text">
+              No upcoming tests assigned yet.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tests-section-header">
+          <div>
+            <h4>Completed Tests</h4>
+            <p id="completedSubtitle">Your recent performance.</p>
+          </div>
+        </div>
+        <div id="completedTestsList" class="tests-list">
+          <div
+            class="test-card tests-empty"
+            id="completedEmptyStateCard"
+          >
+            <div class="tests-empty-icon" aria-hidden="true">
+              <i class="las la-clipboard-check"></i>
+            </div>
+            <div class="tests-empty-text">
+              You haven't completed any tests yet.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Designed &amp; Developed by
+        <a
+          href="https://www.project-k.co.in"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Project K</a
+        >
+      </div>
+    </section>
+
+    <!-- OTHER TABS -->
+    <section
+      id="leaderboardTab"
+      class="tab-content"
+      role="tabpanel"
+      aria-labelledby="tab-leaderboard"
+      tabindex="0"
+    >
+      <div class="card">
+        Leaderboard tab content coming next.
+      </div>
+    </section>
+
+    <section
+      id="mediaTab"
+      class="tab-content"
+      role="tabpanel"
+      aria-labelledby="tab-media"
+      tabindex="0"
+    >
+      <div class="card">
+        Media Feed tab content coming next.
+      </div>
+    </section>
+
+    <section
+      id="profileTab"
+      class="tab-content"
+      role="tabpanel"
+      aria-labelledby="tab-profile"
+      tabindex="0"
+    >
+      <div class="card">
+        <h3 class="profile-title">Profile</h3>
+        <p>
+          Name:
+          <span id="profileName">Student</span>
+        </p>
+        <p>
+          Roll Number:
+          <span id="profileRollNumber">RollNumber</span>
+        </p>
+        <button
+          id="logoutButton"
+          class="test-btn-primary profile-logout-button"
+          type="button"
+        >
+          Logout
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav
+    class="bottom-nav"
+    role="tablist"
+    aria-label="Main sections"
+  >
+    <button
+      id="tab-home"
+      class="nav-item active"
+      type="button"
+      role="tab"
+      aria-selected="true"
+      aria-controls="homeTab"
+      data-tab="home"
+    >
+      <i class="las la-home" aria-hidden="true"></i>
+      <span>Home</span>
+    </button>
+    <button
+      id="tab-tests"
+      class="nav-item"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="testsTab"
+      data-tab="tests"
+    >
+      <i class="las la-clipboard-list" aria-hidden="true"></i>
+      <span>Tests</span>
+    </button>
+    <button
+      id="tab-leaderboard"
+      class="nav-item"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="leaderboardTab"
+      data-tab="leaderboard"
+    >
+      <i class="las la-trophy" aria-hidden="true"></i>
+      <span>Rank</span>
+    </button>
+    <button
+      id="tab-media"
+      class="nav-item"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="mediaTab"
+      data-tab="media"
+    >
+      <i class="las la-stream" aria-hidden="true"></i>
+      <span>Media</span>
+    </button>
+    <button
+      id="tab-profile"
+      class="nav-item"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="profileTab"
+      data-tab="profile"
+    >
+      <i class="las la-user" aria-hidden="true"></i>
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <script>
+    "use strict";
+
+    // THEME + SESSION (front-end only; no real auth here)
+    let isDarkTheme = window.localStorage.getItem("theme") === "dark";
+    if (isDarkTheme) {
+      document.body.classList.add("dark");
+    }
+
+    // SAMPLE STUDENT (replace when connecting login.html)
+    const currentStudentObject = {
+      Name: "RangSwamy",
+      Username: "rswamy",
+      RollNumber: "23022-CM-032"
+    };
+
+    // ===== SAMPLE MOCK TESTS DATA (front-end only) =====
+    const SAMPLE_TESTS = {
+      upcoming: [
+        {
+          testId: "EV-OS-UT1",
+          testName: "OS - CPU Scheduling (Unit Test 1)",
+          subject: "Operating Systems",
+          category: "Semester 3 · CME",
+          duration: 30,
+          totalQuestions: 20,
+          difficulty: "medium",
+          scheduledAt: "2025-11-20T09:30:00Z",
+          createdByName: "CME Dept."
+        },
+        {
+          testId: "EV-DBMS-QUIZ2",
+          testName: "DBMS - Normalization Quiz",
+          subject: "DBMS",
+          category: "Quick Quiz",
+          duration: 15,
+          totalQuestions: 10,
+          difficulty: "easy",
+          scheduledAt: "2025-11-21T17:00:00Z",
+          createdByName: "DBMS Faculty"
+        },
+        {
+          testId: "EV-DSA-PRACTICE1",
+          testName: "DSA - Stacks & Queues (Practice)",
+          subject: "Data Structures through C",
+          category: "Practice Set",
+          duration: 40,
+          totalQuestions: 25,
+          difficulty: "hard",
+          scheduledAt: "2025-11-23T08:00:00Z",
+          createdByName: "CME Dept."
+        }
+      ],
+      completed: [
+        {
+          testId: "EV-OS-PROC",
+          testName: "OS - Process Management",
+          subject: "Operating Systems",
+          difficulty: "medium",
+          score: 18,
+          totalQuestions: 25,
+          percentage: 72.0,
+          rank: 15,
+          attemptedAt: "2025-11-10T10:00:00Z"
+        },
+        {
+          testId: "EV-DBMS-JOINS",
+          testName: "DBMS - Joins & Subqueries",
+          subject: "DBMS",
+          difficulty: "easy",
+          score: 23,
+          totalQuestions: 25,
+          percentage: 92.0,
+          rank: 5,
+          attemptedAt: "2025-11-12T09:45:00Z"
+        },
+        {
+          testId: "EV-DSA-ARRAYS",
+          testName: "DSA - Arrays & Searching",
+          subject: "Data Structures through C",
+          difficulty: "medium",
+          score: 21,
+          totalQuestions: 30,
+          percentage: 70.0,
+          rank: 22,
+          attemptedAt: "2025-11-15T16:00:00Z"
+        }
+      ]
+    };
+
+    // ----- HELPERS -----
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return "";
+      const d = new Date(isoString);
+      return d.toLocaleString(undefined, {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function difficultyCssClass(testDifficulty) {
+      const normalized = String(testDifficulty || "")
+        .toLowerCase()
+        .trim();
+      if (normalized === "easy") return "test-difficulty-easy";
+      if (normalized === "hard") return "test-difficulty-hard";
+      return "test-difficulty-medium";
+    }
+
+    function debounce(fn, delayMs) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delayMs);
+      };
+    }
+
+    // ----- STATE -----
+    let recentScoresChart = null;
+    let difficultyDistributionChart = null;
+    let subjectPerformanceChart = null;
+
+    let testsDataObject = {
+      upcoming: [...SAMPLE_TESTS.upcoming],
+      completed: [...SAMPLE_TESTS.completed]
+    };
+
+    let currentDifficultyFilter = "all";
+
+    // ----- INIT -----
+    window.addEventListener("load", initialize);
+
+    function initialize() {
+      setStudentIdentity();
+      initializeChartsWithSamples();
+      initializeEventListeners();
+      loadOverviewFromSamples();
+      loadTestsFromSamples();
+    }
+
+    function setStudentIdentity() {
+      const studentName =
+        currentStudentObject.Name ||
+        currentStudentObject.Username ||
+        currentStudentObject.RollNumber ||
+        "Student";
+      const studentRollNumber =
+        currentStudentObject.RollNumber || "RollNumber";
+      const studentInitial =
+        studentName.charAt(0).toUpperCase() || "S";
+
+      const userNameElement = byId("userName");
+      const userRollElement = byId("userRoll");
+      const userInitialElement = byId("userInitial");
+      const profileNameElement = byId("profileName");
+      const profileRollNumberElement = byId("profileRollNumber");
+
+      if (userNameElement) userNameElement.textContent = studentName;
+      if (userRollElement)
+        userRollElement.textContent = studentRollNumber;
+      if (userInitialElement)
+        userInitialElement.textContent = studentInitial;
+
+      if (profileNameElement)
+        profileNameElement.textContent = studentName;
+      if (profileRollNumberElement)
+        profileRollNumberElement.textContent = studentRollNumber;
+    }
+
+    // ----- THEME + NAV + LOGOUT -----
+    function handleThemeToggleClick() {
+      isDarkTheme = !isDarkTheme;
+      document.body.classList.toggle("dark", isDarkTheme);
+      window.localStorage.setItem(
+        "theme",
+        isDarkTheme ? "dark" : "light"
+      );
+    }
+
+    function handleNotificationClick() {
+      window.alert(
+        "Notification center will show your test reminders and updates here."
+      );
+    }
+
+    function handleLogoutClick() {
+      const isConfirmed = window.confirm(
+        "Are you sure you want to logout?"
+      );
+      if (!isConfirmed) return;
+      window.sessionStorage.clear();
+      window.localStorage.removeItem("studentData");
+      window.location.href = "login.html";
+    }
+
+    function switchTab(tabKey) {
+      document
+        .querySelectorAll(".tab-content")
+        .forEach((el) => el.classList.remove("active"));
+
+      const tabElement = byId(`${tabKey}Tab`);
+      if (tabElement) {
+        tabElement.classList.add("active");
+        tabElement.focus();
+      }
+
+      const bottomNavItems = document.querySelectorAll(
+        ".bottom-nav .nav-item"
+      );
+      bottomNavItems.forEach((navItem) => {
+        navItem.classList.remove("active");
+        navItem.setAttribute("aria-selected", "false");
+      });
+
+      const tabIndexMap = {
+        home: 0,
+        tests: 1,
+        leaderboard: 2,
+        media: 3,
+        profile: 4
+      };
+      const index = tabIndexMap[tabKey];
+      if (index != null && bottomNavItems[index]) {
+        const navItem = bottomNavItems[index];
+        navItem.classList.add("active");
+        navItem.setAttribute("aria-selected", "true");
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    // ----- EVENT LISTENERS -----
+    function initializeEventListeners() {
+      const themeToggleButton = byId("themeToggleButton");
+      const notificationButton = byId("notificationButton");
+      const profileAvatarButton = byId("profileAvatarButton");
+      const logoutButton = byId("logoutButton");
+      const reloadTestsButton = byId("reloadTestsButton");
+      const testSearchInput = byId("testSearchInput");
+
+      if (themeToggleButton) {
+        themeToggleButton.addEventListener(
+          "click",
+          handleThemeToggleClick
+        );
+      }
+
+      if (notificationButton) {
+        notificationButton.addEventListener(
+          "click",
+          handleNotificationClick
+        );
+      }
+
+      if (profileAvatarButton) {
+        profileAvatarButton.addEventListener("click", () =>
+          switchTab("profile")
+        );
+      }
+
+      if (logoutButton) {
+        logoutButton.addEventListener("click", handleLogoutClick);
+      }
+
+      if (reloadTestsButton) {
+        reloadTestsButton.addEventListener("click", loadTestsFromSamples);
+      }
+
+      if (testSearchInput) {
+        const debouncedSearch = debounce(searchTests, 200);
+        testSearchInput.addEventListener("input", debouncedSearch);
+      }
+
+      document
+        .querySelectorAll(".tests-chip[data-filter]")
+        .forEach((buttonElement) => {
+          buttonElement.addEventListener("click", () => {
+            const difficultyKey =
+              buttonElement.getAttribute("data-filter") || "all";
+            filterByDifficulty(difficultyKey);
+          });
         });
 
-        function preloadMediaTab() {
-            if (document.getElementById('mediaTab')) {
-                setComposerIdentity();
-                loadStories();
-                loadFeed();
-                setupFeedInfiniteScroll();
-                loadChats();
-                loadGroups();
-            }
-        }
-
-        function setComposerIdentity() {
-            document.getElementById('composerAvatar').textContent = currentUser.initials;
-            document.getElementById('composerName').textContent = currentUser.name;
-            document.getElementById('composerRoll').textContent = currentUser.rollNumber;
-        }
-
-        /* ---------------------- TAB SWITCHING ---------------------- */
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tab + 'Tab').classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
-            window.scrollTo(0, 0);
-        }
-
-        function switchMediaTab(evt, view) {
-            document.querySelectorAll('.media-view').forEach(section => section.style.display = 'none');
-            document.getElementById(view + 'View').style.display = 'block';
-
-            document.querySelectorAll('.media-tab').forEach(tab => tab.classList.remove('active'));
-            evt.currentTarget.classList.add('active');
-
-            if (view === 'feed' && !mediaState.feedObserver) {
-                setupFeedInfiniteScroll();
-            }
-        }
-
-        function toggleTheme() {
-            isDark = !isDark;
-            document.body.classList.toggle('dark', isDark);
-            document.getElementById('themeIcon').className = isDark ? 'las la-sun' : 'las la-moon';
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        }
-
-        /* ---------------------- CHARTS ---------------------- */
-        function renderCharts() {
-            const scoreCtx = document.getElementById('scoreChart').getContext('2d');
-            if (scoreChart) scoreChart.destroy();
-            scoreChart = new Chart(scoreCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5'],
-                    datasets: [{
-                        label: 'Score',
-                        data: [75, 80, 78, 85, 90],
-                        borderColor: '#1a73e8',
-                        backgroundColor: 'rgba(26, 115, 232, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
-            if (subjectChart) subjectChart.destroy();
-            subjectChart = new Chart(subjectCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['OS', 'DBMS', 'DSA', 'Networks', 'SE'],
-                    datasets: [{
-                        label: 'Score',
-                        data: [85, 78, 90, 82, 88],
-                        backgroundColor: '#1a73e8'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        /* ---------------------- TESTS SEARCH ---------------------- */
-        function searchTests() {
-            const query = document.getElementById('testSearch').value.toLowerCase();
-            document.querySelectorAll('.test-card').forEach(card => {
-                const title = card.querySelector('.test-title').textContent.toLowerCase();
-                card.style.display = title.includes(query) ? 'block' : 'none';
-            });
-        }
-
-        function filterTests(difficulty) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            document.querySelectorAll('.test-card').forEach(card => {
-                const meta = card.querySelector('.test-meta').textContent.toLowerCase();
-                card.style.display = (difficulty === 'all' || meta.includes(difficulty)) ? 'block' : 'none';
-            });
-        }
-
-        function startTest(testId) {
-            alert(`Starting test: ${testId}`);
-        }
-
-        /* ---------------------- FEED LOGIC ---------------------- */
-        async function loadFeed() {
-            if (mediaState.feedLoading || !mediaState.feedHasMore) return;
-            mediaState.feedLoading = true;
-            document.getElementById('feedLoading').style.display = 'block';
-
-            try {
-                const response = await mockApi('/getFeed', {
-                    rollNumber: currentUser.rollNumber,
-                    page: mediaState.feedPage,
-                    limit: 10
-                });
-
-                const feedList = document.getElementById('feedList');
-
-                response.posts.forEach(post => {
-                    const li = document.createElement('li');
-                    li.className = 'post-card';
-                    li.innerHTML = renderPostCard(post);
-                    feedList.appendChild(li);
-                });
-
-                if (!response.hasMore) {
-                    mediaState.feedHasMore = false;
-                    document.getElementById('feedEndMessage').style.display = 'block';
-                } else {
-                    mediaState.feedPage += 1;
-                }
-            } catch (error) {
-                console.error('Feed load error', error);
-            } finally {
-                mediaState.feedLoading = false;
-                document.getElementById('feedLoading').style.display = 'none';
-            }
-        }
-
-        function renderPostCard(post) {
-            const imagesHtml = post.imageUrls && post.imageUrls.length
-                ? `
-                    <div class="post-carousel">
-                        ${post.imageUrls.map(url => `<img src="${url}" alt="Post image">`).join('')}
-                    </div>
-                    <div class="post-pagination">
-                        ${post.imageUrls.map((_, idx) => `<div class="post-dot ${idx === 0 ? 'active' : ''}"></div>`).join('')}
-                    </div>
-                `
-                : '';
-
-            const topCommentsHtml = (post.topComments || []).slice(0, 2).map(comment => `
-                <div class="comment-item">
-                    <div class="comment-avatar">${comment.authorInitials}</div>
-                    <div class="comment-body">
-                        <div class="comment-header">
-                            <span>${comment.authorName}</span>
-                            <span class="comment-time">${comment.timeAgo}</span>
-                        </div>
-                        <div class="comment-text">${comment.commentText}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            return `
-                <div class="post-header">
-                    <div class="post-avatar">${post.authorInitials}</div>
-                    <div class="post-author">
-                        <div class="post-name">${post.authorName}</div>
-                        <div class="post-roll">${post.authorRoll}</div>
-                    </div>
-                    <div>
-                        <div class="post-time">${post.timeAgo}</div>
-                        <i class="las la-ellipsis-h post-options"></i>
-                    </div>
-                </div>
-                <div class="post-text">${post.postText}</div>
-                ${imagesHtml}
-                <div class="post-stats">
-                    <span onclick="likePost('${post.postId}')">
-                        <i class="las la-heart ${post.isLiked ? 'liked' : ''}"></i> ${post.likesCount.toLocaleString()}
-                    </span>
-                    <span onclick="openComments('${post.postId}')"><i class="las la-comment"></i> ${post.commentsCount}</span>
-                    <span onclick="sharePost('${post.postId}')"><i class="las la-share"></i> ${post.sharesCount}</span>
-                    <span onclick="savePost('${post.postId}')"><i class="las la-bookmark ${post.isSaved ? 'saved' : ''}"></i> Save</span>
-                </div>
-                <div class="post-comments">
-                    <div class="view-comments" onclick="openComments('${post.postId}')">View all ${post.commentsCount} comments</div>
-                    ${topCommentsHtml}
-                    <div class="comment-input-wrapper">
-                        <div class="comment-avatar">${currentUser.initials}</div>
-                        <input type="text" placeholder="Add a comment..." onkeypress="handleCommentKeypress(event, '${post.postId}')">
-                    </div>
-                </div>
-            `;
-        }
-
-        function setupFeedInfiniteScroll() {
-            const observerTarget = document.getElementById('feedEndMessage');
-            if (!observerTarget) return;
-
-            mediaState.feedObserver = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        loadFeed();
-                    }
-                });
-            }, { rootMargin: '200px' });
-
-            mediaState.feedObserver.observe(observerTarget);
-        }
-
-        function togglePostButton() {
-            const text = document.getElementById('postInput').value.trim();
-            document.getElementById('postButton').disabled = !text;
-        }
-
-        function handlePostImages(event) {
-            const files = Array.from(event.target.files || []);
-            const preview = document.getElementById('selectedImagesPreview');
-            preview.innerHTML = '';
-            if (!files.length) {
-                preview.style.display = 'none';
-                return;
-            }
-
-            preview.style.display = 'flex';
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '70px';
-                    img.style.height = '70px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '10px';
-                    preview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function createPost() {
-            const text = document.getElementById('postInput').value.trim();
-            if (!text) {
-                alert('Please write something!');
-                return;
-            }
-
-            const files = Array.from(document.getElementById('postImagesInput').files || []);
-            const base64Images = await Promise.all(files.map(file => fileToBase64(file)));
-
-            try {
-                const payload = {
-                    rollNumber: currentUser.rollNumber,
-                    postText: text,
-                    images: base64Images,
-                    hashtags: extractHashtags(text),
-                    mentions: extractMentions(text)
-                };
-
-                const response = await mockApi('/createPost', payload);
-
-                const newPost = {
-                    postId: response.postId,
-                    authorRoll: currentUser.rollNumber,
-                    authorName: currentUser.name,
-                    authorInitials: currentUser.initials,
-                    postText: text,
-                    imageUrls: response.imageUrls || [],
-                    likesCount: 0,
-                    commentsCount: 0,
-                    sharesCount: 0,
-                    isLiked: false,
-                    isSaved: false,
-                    timeAgo: 'Just now',
-                    topComments: []
-                };
-
-                const feedList = document.getElementById('feedList');
-                const li = document.createElement('li');
-                li.className = 'post-card';
-                li.innerHTML = renderPostCard(newPost);
-                feedList.insertBefore(li, feedList.firstChild);
-
-                document.getElementById('postInput').value = '';
-                document.getElementById('postImagesInput').value = '';
-                togglePostButton();
-                handlePostImages({ target: { files: [] } });
-            } catch (error) {
-                console.error('Post creation failed', error);
-                alert('Sorry, something went wrong while creating the post.');
-            }
-        }
-
-        function extractHashtags(text) {
-            const matches = text.match(/#\w+/g);
-            return matches ? matches.map(tag => tag.toLowerCase()) : [];
-        }
-
-        function extractMentions(text) {
-            const matches = text.match(/@\w+/g);
-            return matches ? matches.map(mention => mention.replace('@', '')) : [];
-        }
-
-        function handleCommentKeypress(evt, postId) {
-            if (evt.key === 'Enter' && evt.target.value.trim()) {
-                evt.preventDefault();
-                postComment(postId, evt.target.value.trim());
-                evt.target.value = '';
-            }
-        }
-
-        async function postComment(postId, text) {
-            try {
-                await mockApi('/addComment', {
-                    rollNumber: currentUser.rollNumber,
-                    postId,
-                    commentText: text
-                });
-                alert('Comment added!');
-            } catch (error) {
-                console.error('Add comment failed', error);
-            }
-        }
-
-        async function likePost(postId) {
-            try {
-                await mockApi('/likePost', {
-                    rollNumber: currentUser.rollNumber,
-                    postId
-                });
-                alert('Toggled like for ' + postId);
-            } catch (error) {
-                console.error('Like post failed', error);
-            }
-        }
-
-        function openComments(postId) {
-            alert('Open comments modal for ' + postId);
-        }
-
-        function sharePost(postId) {
-            alert('Share post ' + postId);
-        }
-
-        function savePost(postId) {
-            alert('Saved post ' + postId);
-        }
-
-        /* ---------------------- STORIES LOGIC ---------------------- */
-        async function loadStories() {
-            try {
-                const response = await mockApi('/getStories', {});
-                renderStoriesCarousel(response.stories);
-            } catch (error) {
-                console.error('Load stories failed', error);
-            }
-        }
-
-        function renderStoriesCarousel(stories) {
-            const carousel = document.getElementById('storiesCarousel');
-            const list = document.getElementById('storiesList');
-
-            const storyCard = story => `
-                <div class="story-item" onclick="openStory('${story.storyId}')">
-                    <div class="story-avatar-wrapper ${story.viewed ? 'viewed' : ''}">
-                        <div class="story-avatar" style="${story.imageUrl ? `background-image:url('${story.imageUrl}');background-size:cover;background-position:center;` : ''}">
-                            ${!story.imageUrl ? story.initials : ''}
-                        </div>
-                        ${story.isYourStory ? '<div class="story-plus">+</div>' : ''}
-                    </div>
-                    <div class="story-name">${story.name}</div>
-                </div>
-            `;
-
-            const yourStory = {
-                storyId: 'your-story',
-                name: 'Your Story',
-                initials: currentUser.initials,
-                viewed: false,
-                isYourStory: true
-            };
-
-            carousel.innerHTML = [storyCard(yourStory), ...stories.map(storyCard)].join('');
-            list.innerHTML = stories.map(storyCard).join('');
-        }
-
-        async function openStory(storyId) {
-            if (storyId === 'your-story') {
-                document.getElementById('uploadStoryInput').click();
-                return;
-            }
-
-            try {
-                const response = await mockApi('/getStory', { storyId });
-                mediaState.currentStorySet = response.storySequence || [response.story];
-                mediaState.currentStoryIndex = 0;
-                showStory(mediaState.currentStorySet[0]);
-            } catch (error) {
-                console.error('Open story failed', error);
-            }
-        }
-
-        function showStory(story) {
-            const viewer = document.getElementById('storyViewer');
-            viewer.classList.add('active');
-
-            document.getElementById('storyAuthorAvatar').textContent = story.authorInitials || story.authorName[0];
-            document.getElementById('storyAuthorName').textContent = story.authorName;
-            document.getElementById('storyTime').textContent = story.timeAgo || 'Just now';
-
-            const storyMain = document.getElementById('storyMain');
-            storyMain.innerHTML = '';
-            const media = document.createElement('img');
-            media.src = story.imageUrl;
-            media.className = 'story-media';
-            storyMain.appendChild(media);
-
-            renderStoryProgress(mediaState.currentStorySet.length, mediaState.currentStoryIndex);
-        }
-
-        function renderStoryProgress(total, currentIndex) {
-            const container = document.getElementById('storyProgress');
-            container.innerHTML = '';
-            for (let i = 0; i < total; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'story-progress-bar';
-                const fill = document.createElement('div');
-                fill.className = 'story-progress-fill';
-                if (i < currentIndex) fill.style.width = '100%';
-                if (i === currentIndex) {
-                    fill.style.width = '0%';
-                    setTimeout(() => {
-                        fill.style.transition = 'width 5s linear';
-                        fill.style.width = '100%';
-                    }, 50);
-                    setTimeout(nextStory, 5000);
-                } else {
-                    fill.style.transition = 'none';
-                }
-                bar.appendChild(fill);
-                container.appendChild(bar);
-            }
-        }
-
-        function nextStory() {
-            mediaState.currentStoryIndex += 1;
-            if (mediaState.currentStoryIndex < mediaState.currentStorySet.length) {
-                showStory(mediaState.currentStorySet[mediaState.currentStoryIndex]);
-            } else {
-                closeStoryViewer();
-            }
-        }
-
-        function closeStoryViewer() {
-            mediaState.currentStoryIndex = 0;
-            mediaState.currentStorySet = [];
-            document.getElementById('storyViewer').classList.remove('active');
-        }
-
-        async function uploadStory(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const base64 = await fileToBase64(file);
-            try {
-                await mockApi('/uploadStory', {
-                    rollNumber: currentUser.rollNumber,
-                    imageBase64: base64
-                });
-                alert('Story uploaded!');
-                loadStories();
-            } catch (error) {
-                console.error('Upload story failed', error);
-            }
-        }
-
-        function handleStoryReplyKey(evt) {
-            if (evt.key === 'Enter') {
-                evt.preventDefault();
-                sendStoryReply();
-            }
-        }
-
-        function sendStoryReply() {
-            const text = document.getElementById('storyReplyInput').value.trim();
-            if (!text) return;
-            alert('Story reply: ' + text);
-            document.getElementById('storyReplyInput').value = '';
-        }
-
-        /* ---------------------- CHAT LOGIC ---------------------- */
-        async function loadChats() {
-            try {
-                const response = await mockApi('/getConversations', { rollNumber: currentUser.rollNumber });
-                mediaState.conversations = response.conversations;
-                renderChatList(response.conversations);
-            } catch (error) {
-                console.error('Load conversations failed', error);
-            }
-        }
-
-        function renderChatList(conversations) {
-            const container = document.getElementById('chatList');
-            container.innerHTML = conversations.map(conv => `
-                <div class="chat-item ${conv.userId === mediaState.activeChatId ? 'active' : ''}" onclick="openChat('${conv.userId}')">
-                    <div class="chat-avatar">
-                        <div class="avatar-circle">${conv.userInitials || conv.userName[0]}</div>
-                        ${conv.isOnline ? '<div class="online-indicator"></div>' : ''}
-                    </div>
-                    <div class="chat-info">
-                        <div class="chat-top">
-                            <span class="chat-name">${conv.userName}</span>
-                            <span class="chat-time">${formatTime(conv.lastMessageTime)}</span>
-                        </div>
-                        <div class="chat-bottom">
-                            <span class="chat-preview">${conv.lastMessage || 'Say hello 👋'}</span>
-                            ${conv.unreadCount ? `<span class="chat-unread">${conv.unreadCount}</span>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function openChat(userId) {
-            mediaState.activeChatId = userId;
-            const conversation = mediaState.conversations.find(c => c.userId === userId);
-            if (!conversation) return;
-
-            document.getElementById('conversationCard').classList.remove('hidden-mobile');
-            document.getElementById('conversationName').textContent = conversation.userName;
-            document.getElementById('conversationStatus').textContent = conversation.isOnline ? 'Online' : 'Last seen recently';
-            document.getElementById('conversationAvatar').textContent = conversation.userInitials || conversation.userName[0];
-            document.getElementById('conversationOnlineIndicator').style.display = conversation.isOnline ? 'block' : 'none';
-
-            document.getElementById('messageInput').disabled = false;
-            document.getElementById('sendMessageBtn').disabled = false;
-
-            await loadMessages(userId);
-        }
-
-        function closeConversation() {
-            mediaState.activeChatId = null;
-            document.getElementById('conversationCard').classList.add('hidden-mobile');
-        }
-
-        async function loadMessages(otherUserRoll) {
-            try {
-                const response = await mockApi('/getMessages', {
-                    rollNumber: currentUser.rollNumber,
-                    otherUserRoll
-                });
-                renderMessages(response.messages || []);
-            } catch (error) {
-                console.error('Load messages failed', error);
-            }
-        }
-
-        function renderMessages(messages) {
-            const container = document.getElementById('messagesArea');
-            container.innerHTML = messages.map(msg => `
-                <div class="message-wrapper ${msg.senderRoll === currentUser.rollNumber ? 'sent' : 'received'}">
-                    <div class="message-bubble">${msg.text}</div>
-                    <div class="message-meta">
-                        <span>${formatTime(msg.sentAt)}</span>
-                        ${msg.senderRoll === currentUser.rollNumber ? `<span class="message-status">${renderStatus(msg.status)}</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const textarea = document.getElementById('messageInput');
-            const text = textarea.value.trim();
-            if (!text || !mediaState.activeChatId) return;
-
-            try {
-                await mockApi('/sendMessage', {
-                    senderRoll: currentUser.rollNumber,
-                    receiverRoll: mediaState.activeChatId,
-                    messageText: text
-                });
-                textarea.value = '';
-                loadMessages(mediaState.activeChatId);
-            } catch (error) {
-                console.error('Send message failed', error);
-            }
-        }
-
-        function filterChats(evt) {
-            const query = evt.target.value.toLowerCase();
-            const filtered = mediaState.conversations.filter(conv =>
-                conv.userName.toLowerCase().includes(query) ||
-                conv.lastMessage.toLowerCase().includes(query)
-            );
-            renderChatList(filtered);
-        }
-
-        /* ---------------------- GROUPS LOGIC ---------------------- */
-        async function loadGroups() {
-            try {
-                const response = await mockApi('/getGroups', { rollNumber: currentUser.rollNumber });
-                mediaState.groups = response.groups || [];
-                renderGroups(mediaState.groups);
-            } catch (error) {
-                console.error('Load groups failed', error);
-            }
-        }
-
-        function renderGroups(groups) {
-            const container = document.getElementById('groupsList');
-            const emptyState = document.getElementById('groupsEmptyState');
-
-            if (!groups.length) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            container.innerHTML = groups.map(group => `
-                <div class="group-card" onclick="openGroup('${group.groupId}')">
-                    <div class="group-icon">${group.icon || '👥'}</div>
-                    <div class="group-content">
-                        <div class="group-top">
-                            <div>
-                                <div class="group-name">${group.groupName}</div>
-                                <div class="group-meta">${group.membersCount} members • Last active ${formatTime(group.lastMessageTime)}</div>
-                            </div>
-                            ${group.unreadCount ? `<span class="group-unread">${group.unreadCount}</span>` : ''}
-                        </div>
-                        <div class="group-description">"${group.description}"</div>
-                        <div class="group-last-message">
-                            <span>${group.lastMessage || 'New group created!'}</span>
-                            <span>${group.lastMessageTime ? formatRelativeTime(group.lastMessageTime) : ''}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function filterGroups(evt) {
-            const query = evt.target.value.toLowerCase();
-            const filtered = mediaState.groups.filter(group =>
-                group.groupName.toLowerCase().includes(query) ||
-                group.description.toLowerCase().includes(query)
-            );
-            renderGroups(filtered);
-        }
-
-        function openGroup(groupId) {
-            alert('Open group chat for ' + groupId);
-        }
-
-        function openCreateGroupModal() {
-            alert('Open create group flow');
-        }
-
-        /* ---------------------- SEARCH ---------------------- */
-        let searchTimeout;
-        function handleMediaSearch(evt) {
-            clearTimeout(searchTimeout);
-            const query = evt.target.value.trim();
-            searchTimeout = setTimeout(() => performMediaSearch(query), 400);
-        }
-
-        async function performMediaSearch(query) {
-            if (!query) return;
-            try {
-                const response = await mockApi('/searchMedia', {
-                    query,
-                    type: 'all'
-                });
-                console.log('Search results:', response);
-            } catch (error) {
-                console.error('Media search failed', error);
-            }
-        }
-
-        /* ---------------------- UTILITIES ---------------------- */
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function formatTime(isoString) {
-            if (!isoString) return '';
-            const date = new Date(isoString);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function formatRelativeTime(isoString) {
-            const now = new Date();
-            const then = new Date(isoString);
-            const diffMs = now - then;
-            const diffMinutes = Math.floor(diffMs / 60000);
-            if (diffMinutes < 1) return 'Just now';
-            if (diffMinutes < 60) return `${diffMinutes}m ago`;
-            const diffHours = Math.floor(diffMinutes / 60);
-            if (diffHours < 24) return `${diffHours}h ago`;
-            const diffDays = Math.floor(diffHours / 24);
-            return `${diffDays}d ago`;
-        }
-
-        function renderStatus(status) {
-            switch (status) {
-                case 'sent': return '✓';
-                case 'delivered': return '✓✓';
-                case 'read': return '<span style="color:#4fc3f7;">✓✓</span>';
-                default: return '';
-            }
-        }
-
-        /* ---------------------- MOCK API ---------------------- */
-        async function mockApi(endpoint, payload) {
-            await new Promise(resolve => setTimeout(resolve, 400));
-
-            switch (endpoint) {
-                case '/getFeed':
-                    return {
-                        success: true,
-                        posts: Array.from({ length: 4 }, (_, idx) => ({
-                            postId: 'post-' + (mediaState.feedPage * 10 + idx),
-                            authorRoll: '2300' + idx + '-CM-00' + idx,
-                            authorName: ['Priya Sharma', 'Rohan Kumar', 'Sneha Mehta', 'Arjun Patel'][idx % 4],
-                            authorInitials: ['P', 'R', 'S', 'A'][idx % 4],
-                            postText: [
-                                'Just aced my OS exam! 🎉 CPU scheduling was easier than I thought. #OperatingSystems #Success',
-                                'Library study session tonight? DM if you’re coming!',
-                                'Made flashcards for DBMS normalization. Sharing soon!',
-                                'Group project milestone 2 submitted ✅'
-                            ][idx % 4],
-                            imageUrls: idx % 2 === 0 ? ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800'] : [],
-                            likesCount: 523 + idx * 11,
-                            commentsCount: 12 + idx,
-                            sharesCount: 4 + idx,
-                            isLiked: false,
-                            isSaved: false,
-                            timeAgo: ['2 hours ago', '3 hours ago', 'Yesterday', 'Nov 12'][idx % 4],
-                            topComments: [
-                                {
-                                    authorName: 'Rohan Kumar',
-                                    authorInitials: 'R',
-                                    commentText: 'Great job! 👏',
-                                    timeAgo: '2h ago'
-                                },
-                                {
-                                    authorName: 'Sneha Mehta',
-                                    authorInitials: 'S',
-                                    commentText: 'Let’s celebrate this weekend!',
-                                    timeAgo: '1h ago'
-                                }
-                            ]
-                        })),
-                        hasMore: mediaState.feedPage < 3
-                    };
-
-                case '/createPost':
-                    return {
-                        success: true,
-                        postId: 'post-' + Date.now(),
-                        imageUrls: (payload.images || []).map((_, idx) => `https://picsum.photos/seed/${Date.now() + idx}/600/400`)
-                    };
-
-                case '/likePost':
-                    return { success: true, newCount: 1, isLiked: true };
-
-                case '/addComment':
-                    return { success: true, commentId: 'comment-' + Date.now() };
-
-                case '/getStories':
-                    return {
-                        stories: [
-                            { storyId: 'story-1', name: 'Priya', initials: 'P', imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=200', viewed: false },
-                            { storyId: 'story-2', name: 'Rohan', initials: 'R', imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200', viewed: true },
-                            { storyId: 'story-3', name: 'Sneha', initials: 'S', imageUrl: '', viewed: false },
-                            { storyId: 'story-4', name: 'Arjun', initials: 'A', imageUrl: '', viewed: true }
-                        ]
-                    };
-
-                case '/getStory':
-                    return {
-                        storySequence: [
-                            {
-                                storyId: 'story-1',
-                                authorName: 'Priya Sharma',
-                                authorInitials: 'P',
-                                imageUrl: 'https://images.unsplash.com/photo-1537432376769-00a24d1eae1b?w=600',
-                                timeAgo: '2h ago'
-                            },
-                            {
-                                storyId: 'story-1b',
-                                authorName: 'Priya Sharma',
-                                authorInitials: 'P',
-                                imageUrl: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?w=600',
-                                timeAgo: '2h ago'
-                            }
-                        ]
-                    };
-
-                case '/uploadStory':
-                    return { success: true, storyId: 'story-' + Date.now() };
-
-                case '/getConversations':
-                    return {
-                        conversations: [
-                            {
-                                userId: '23001-CM-001',
-                                userName: 'Priya Sharma',
-                                userInitials: 'P',
-                                lastMessage: 'Great! See you tomorrow...',
-                                lastMessageTime: new Date().toISOString(),
-                                unreadCount: 3,
-                                isOnline: true
-                            },
-                            {
-                                userId: '23002-CM-002',
-                                userName: 'Rohan Kumar',
-                                userInitials: 'R',
-                                lastMessage: 'Did you finish the assignment?',
-                                lastMessageTime: new Date(Date.now() - 3600 * 1000).toISOString(),
-                                unreadCount: 0,
-                                isOnline: false
-                            },
-                            {
-                                userId: 'group-chat',
-                                userName: 'Study Group',
-                                userInitials: 'SG',
-                                lastMessage: 'Sneha: Meeting at 3 PM today?',
-                                lastMessageTime: new Date(Date.now() - 86400 * 1000).toISOString(),
-                                unreadCount: 7,
-                                isOnline: true
-                            }
-                        ]
-                    };
-
-                case '/getMessages':
-                    return {
-                        messages: [
-                            {
-                                messageId: 'msg-1',
-                                senderRoll: endpoint === '/getMessages' ? payload.otherUserRoll : currentUser.rollNumber,
-                                text: 'Hey! Did you study for tomorrow\'s test?',
-                                sentAt: new Date(Date.now() - 180000).toISOString(),
-                                status: 'read'
-                            },
-                            {
-                                messageId: 'msg-2',
-                                senderRoll: currentUser.rollNumber,
-                                text: 'Yes! Finished OS notes yesterday ✓✓',
-                                sentAt: new Date(Date.now() - 120000).toISOString(),
-                                status: 'read'
-                            },
-                            {
-                                messageId: 'msg-3',
-                                senderRoll: payload.otherUserRoll,
-                                text: 'Great! Let\'s revise together at 3 PM?',
-                                sentAt: new Date(Date.now() - 60000).toISOString(),
-                                status: 'delivered'
-                            }
-                        ]
-                    };
-
-                case '/sendMessage':
-                    return { success: true, messageId: 'msg-' + Date.now() };
-
-                case '/getGroups':
-                    return {
-                        groups: [
-                            {
-                                groupId: 'group-123',
-                                groupName: 'OS Study Group',
-                                icon: '📚',
-                                description: 'Let\'s ace the exam together!',
-                                membersCount: 24,
-                                lastMessage: 'Rohan: Anyone for doubt session?',
-                                lastMessageTime: new Date(Date.now() - 600000).toISOString(),
-                                unreadCount: 5
-                            },
-                            {
-                                groupId: 'group-456',
-                                groupName: 'DBMS Preparation',
-                                icon: '🗄️',
-                                description: 'Normalization practice',
-                                membersCount: 18,
-                                lastMessage: 'Priya: Check pinned notes',
-                                lastMessageTime: new Date(Date.now() - 7200000).toISOString(),
-                                unreadCount: 0
-                            }
-                        ]
-                    };
-
-                case '/searchMedia':
-                    return {
-                        results: [
-                            { type: 'post', id: 'post-123', text: 'Sample search hit' },
-                            { type: 'student', id: '23001-CM-001', name: 'Priya Sharma' }
-                        ]
-                    };
-
-                default:
-                    return { success: true };
-            }
-        }
-
-        /* ---------------------- STORY NAVIGATION ---------------------- */
-        document.getElementById('storyMain').addEventListener('click', event => {
-            const bounding = event.currentTarget.getBoundingClientRect();
-            const clickX = event.clientX - bounding.left;
-            if (clickX < bounding.width / 3) {
-                previousStory();
-            } else {
-                nextStory();
-            }
+      document
+        .querySelectorAll(".bottom-nav .nav-item")
+        .forEach((navItem) => {
+          navItem.addEventListener("click", () => {
+            const tabKey = navItem.getAttribute("data-tab") || "home";
+            switchTab(tabKey);
+          });
         });
 
-        function previousStory() {
-            mediaState.currentStoryIndex -= 1;
-            if (mediaState.currentStoryIndex >= 0) {
-                showStory(mediaState.currentStorySet[mediaState.currentStoryIndex]);
-            } else {
-                closeStoryViewer();
-            }
-        }
+      const upcomingTestsList = byId("upcomingTestsList");
+      const completedTestsList = byId("completedTestsList");
 
-        /* ---------------------- MISC ---------------------- */
-        function showNotifications() {
-            alert('Notifications:\n1. New test available\n2. Leaderboard updated\n3. New comment on your post');
-        }
+      if (upcomingTestsList) {
+        upcomingTestsList.addEventListener(
+          "click",
+          handleTestsListClick
+        );
+      }
+      if (completedTestsList) {
+        completedTestsList.addEventListener(
+          "click",
+          handleTestsListClick
+        );
+      }
+    }
 
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                alert('Logged out!');
-                window.location.href = 'login.html';
-            }
+    // ----- OVERVIEW FROM SAMPLE DATA -----
+    function initializeChartsWithEmptyData() {
+      const defaultLabels = ["Test 1", "Test 2", "Test 3", "Test 4", "Test 5"];
+      const zeroValues = [0, 0, 0, 0, 0];
+
+      renderRecentScoresChart(defaultLabels, zeroValues);
+      renderDifficultyDistributionChart(0, 0, 0);
+      renderSubjectPerformanceChart();
+    }
+
+    function initializeChartsWithSamples() {
+      initializeChartsWithEmptyData();
+    }
+
+    function loadOverviewFromSamples() {
+      const completed = SAMPLE_TESTS.completed;
+
+      const totalTests = completed.length;
+      const percentages = completed.map((t) => t.percentage || 0);
+      const avgScore =
+        percentages.length
+          ? percentages.reduce((a, b) => a + b, 0) / percentages.length
+          : 0;
+      const bestScore =
+        percentages.length ? Math.max(...percentages) : 0;
+
+      const accuracy = Math.round(avgScore); // simple approx
+      const rank = 12;
+      const streakDays = 3;
+
+      const difficulties = completed.map((t) =>
+        String(t.difficulty || "").toLowerCase().trim()
+      );
+      const distribution = {
+        easy: difficulties.filter((d) => d === "easy").length,
+        medium: difficulties.filter((d) => d === "medium").length,
+        hard: difficulties.filter((d) => d === "hard").length
+      };
+
+      const totalTestsElement = byId("statTestsCompleted");
+      const avgScoreElement = byId("statAverageScore");
+      const rankElement = byId("statGlobalRank");
+      const accuracyElement = byId("statAnswerAccuracy");
+      const bestScoreElement = byId("miniBestScoreValue");
+      const lastTestScoreElement = byId("miniLastTestScore");
+      const streakElement = byId("miniDailyStreak");
+
+      if (totalTestsElement) {
+        totalTestsElement.textContent = String(totalTests);
+      }
+
+      if (avgScoreElement) {
+        avgScoreElement.textContent = avgScore.toFixed(1);
+      }
+
+      if (rankElement) {
+        rankElement.textContent = rank;
+      }
+
+      if (accuracyElement) {
+        accuracyElement.textContent = accuracy;
+      }
+
+      if (bestScoreElement) {
+        bestScoreElement.textContent = bestScore.toFixed(1);
+      }
+
+      const lastTestRecord = completed[completed.length - 1];
+      if (lastTestScoreElement) {
+        if (lastTestRecord && typeof lastTestRecord.percentage === "number") {
+          lastTestScoreElement.textContent =
+            lastTestRecord.percentage.toFixed(1);
+        } else {
+          lastTestScoreElement.textContent = "0";
         }
-    </script>
+      }
+
+      if (streakElement) {
+        streakElement.textContent = `${streakDays} days`;
+      }
+
+      const labels =
+        completed.length > 0
+          ? completed.map((t) => t.testId)
+          : ["Test 1", "Test 2", "Test 3", "Test 4", "Test 5"];
+      const scores =
+        completed.length > 0
+          ? completed.map((t) => t.percentage || 0)
+          : [0, 0, 0, 0, 0];
+
+      renderRecentScoresChart(labels, scores);
+      renderDifficultyDistributionChart(
+        distribution.easy,
+        distribution.medium,
+        distribution.hard
+      );
+
+      renderSubjectPerformanceChart();
+    }
+
+    // ----- CHART RENDERERS -----
+    function renderRecentScoresChart(labels, dataPoints) {
+      const canvas = byId("recentScoresChartCanvas");
+      if (!canvas || !window.Chart) return;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      if (recentScoresChart) {
+        recentScoresChart.destroy();
+      }
+
+      recentScoresChart = new window.Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Score",
+              data: dataPoints,
+              borderColor: "#1a73e8",
+              backgroundColor: "rgba(26,115,232,0.1)",
+              tension: 0.4,
+              fill: true,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              ticks: {
+                stepSize: 20
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderDifficultyDistributionChart(
+      easyCount,
+      mediumCount,
+      hardCount
+    ) {
+      const canvas = byId("difficultyDistributionChartCanvas");
+      if (!canvas || !window.Chart) return;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      if (difficultyDistributionChart) {
+        difficultyDistributionChart.destroy();
+      }
+
+      difficultyDistributionChart = new window.Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Easy", "Medium", "Hard"],
+          datasets: [
+            {
+              data: [easyCount, mediumCount, hardCount],
+              backgroundColor: ["#34c759", "#fbbc05", "#ea4335"]
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                boxWidth: 14,
+                font: {
+                  size: 11
+                }
+              }
+            }
+          },
+          cutout: "60%"
+        }
+      });
+    }
+
+    function renderSubjectPerformanceChart() {
+      const canvas = byId("subjectPerformanceChartCanvas");
+      if (!canvas || !window.Chart) return;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      if (subjectPerformanceChart) {
+        subjectPerformanceChart.destroy();
+      }
+
+      const subjects = [
+        "OS",
+        "DBMS",
+        "DSA",
+        "Networks",
+        "SE"
+      ];
+      const values = [78, 92, 70, 0, 0]; // sample
+
+      subjectPerformanceChart = new window.Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: subjects,
+          datasets: [
+            {
+              label: "Score",
+              data: values,
+              backgroundColor: "#1a73e8"
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              ticks: {
+                stepSize: 20
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ----- TESTS RENDERING FROM SAMPLE DATA -----
+    function loadTestsFromSamples() {
+      testsDataObject.upcoming = [...SAMPLE_TESTS.upcoming];
+      testsDataObject.completed = [...SAMPLE_TESTS.completed];
+      renderTestsLists();
+    }
+
+    function filterTestsByDifficultyOnly(testList) {
+      if (currentDifficultyFilter === "all") return testList;
+      return testList.filter((test) => {
+        return (
+          String(test.difficulty || "")
+            .toLowerCase()
+            .trim() === currentDifficultyFilter
+        );
+      });
+    }
+
+    function renderTestsLists() {
+      const upcomingContainer = byId("upcomingTestsList");
+      const completedContainer = byId("completedTestsList");
+      const upcomingEmptyCard = byId("upcomingEmptyStateCard");
+      const completedEmptyCard = byId("completedEmptyStateCard");
+
+      if (!upcomingContainer || !completedContainer) return;
+
+      upcomingContainer.innerHTML = "";
+      completedContainer.innerHTML = "";
+
+      const filteredUpcomingTests = filterTestsByDifficultyOnly(
+        testsDataObject.upcoming
+      );
+      const filteredCompletedTests = filterTestsByDifficultyOnly(
+        testsDataObject.completed
+      );
+
+      if (!filteredUpcomingTests.length) {
+        if (upcomingEmptyCard) {
+          upcomingContainer.appendChild(upcomingEmptyCard);
+        }
+      } else {
+        filteredUpcomingTests.forEach((testObject) => {
+          upcomingContainer.appendChild(
+            buildUpcomingTestCard(testObject)
+          );
+        });
+      }
+
+      if (!filteredCompletedTests.length) {
+        if (completedEmptyCard) {
+          completedContainer.appendChild(completedEmptyCard);
+        }
+      } else {
+        filteredCompletedTests.forEach((testObject) => {
+          completedContainer.appendChild(
+            buildCompletedTestCard(testObject)
+          );
+        });
+      }
+
+      const upcomingSubtitleElement = byId("upcomingSubtitle");
+      const completedSubtitleElement = byId("completedSubtitle");
+
+      if (upcomingSubtitleElement) {
+        upcomingSubtitleElement.textContent = filteredUpcomingTests.length
+          ? `${filteredUpcomingTests.length} tests scheduled`
+          : "Ready to attempt.";
+      }
+
+      if (completedSubtitleElement) {
+        completedSubtitleElement.textContent = filteredCompletedTests.length
+          ? `${filteredCompletedTests.length} tests completed recently`
+          : "Your recent performance.";
+      }
+    }
+
+    function buildUpcomingTestCard(testObject) {
+      const cardElement = document.createElement("div");
+      cardElement.className = "test-card";
+      cardElement.dataset.testId = testObject.testId;
+
+      const createdBy = testObject.createdByName || "Lecturer";
+
+      cardElement.innerHTML = `
+        <div class="test-top-row">
+          <div>
+            <div class="test-title">
+              ${testObject.testName || "Untitled Test"}
+            </div>
+            <div class="test-id">${testObject.testId || ""}</div>
+          </div>
+          <div>
+            <button
+              class="test-btn-primary js-start-test"
+              type="button"
+              data-test-id="${testObject.testId || ""}"
+            >
+              Start Test
+              <i class="las la-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="test-meta-row">
+          <span class="test-meta-pill">
+            <i class="las la-book" aria-hidden="true"></i>
+            <span>${testObject.subject || "General"}</span>
+          </span>
+          <span class="test-meta-pill">
+            <i class="las la-clock" aria-hidden="true"></i>
+            <span>${testObject.duration || 0} min</span>
+          </span>
+          <span class="test-meta-pill">
+            <i class="las la-list" aria-hidden="true"></i>
+            <span>${testObject.totalQuestions || 0} questions</span>
+          </span>
+          ${
+            testObject.category
+              ? `
+          <span class="test-meta-pill">
+            <i class="las la-layer-group" aria-hidden="true"></i>
+            <span>${testObject.category}</span>
+          </span>`
+              : ""
+          }
+          ${
+            testObject.scheduledAt
+              ? `
+          <span class="test-meta-pill">
+            <i class="las la-calendar" aria-hidden="true"></i>
+            <span>${formatDateTime(testObject.scheduledAt)}</span>
+          </span>`
+              : ""
+          }
+        </div>
+        <div class="test-bottom-row">
+          <span class="test-difficulty-pill ${difficultyCssClass(
+            testObject.difficulty
+          )}">
+            ${testObject.difficulty || "Medium"}
+          </span>
+          <span style="color: var(--text-muted);">
+            Created by ${createdBy}
+          </span>
+        </div>
+      `;
+
+      return cardElement;
+    }
+
+    function buildCompletedTestCard(testObject) {
+      const cardElement = document.createElement("div");
+      cardElement.className = "test-card";
+      cardElement.dataset.testId = testObject.testId;
+
+      const percentage =
+        typeof testObject.percentage === "number"
+          ? testObject.percentage.toFixed(1)
+          : "0.0";
+      const scoreText = `${testObject.score || 0} / ${
+        testObject.totalQuestions || 0
+      }`;
+
+      cardElement.innerHTML = `
+        <div class="test-top-row">
+          <div>
+            <div class="test-title">
+              ${testObject.testName || "Completed Test"}
+            </div>
+            <div class="test-id">${testObject.testId || ""}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="test-title" style="color: var(--primary);">
+              ${percentage}%
+            </div>
+            <div class="test-id">
+              Score ${scoreText}
+            </div>
+          </div>
+        </div>
+        <div class="test-meta-row">
+          <span class="test-meta-pill">
+            <i class="las la-book" aria-hidden="true"></i>
+            <span>${testObject.subject || "General"}</span>
+          </span>
+          <span class="test-meta-pill">
+            <i class="las la-trophy" aria-hidden="true"></i>
+            <span>Rank ${testObject.rank != null ? testObject.rank : "--"}</span>
+          </span>
+          ${
+            testObject.attemptedAt
+              ? `
+          <span class="test-meta-pill">
+            <i class="las la-history" aria-hidden="true"></i>
+            <span>${formatDateTime(testObject.attemptedAt)}</span>
+          </span>`
+              : ""
+          }
+        </div>
+        <div class="test-bottom-row">
+          <span class="test-difficulty-pill ${difficultyCssClass(
+            testObject.difficulty
+          )}">
+            ${testObject.difficulty || "Medium"}
+          </span>
+          <button
+            class="test-btn-primary js-view-analysis"
+            type="button"
+            data-test-id="${testObject.testId || ""}"
+          >
+            View Analysis
+            <i class="las la-chart-line" aria-hidden="true"></i>
+          </button>
+        </div>
+      `;
+
+      return cardElement;
+    }
+
+    function searchTests() {
+      const searchInputElement = byId("testSearchInput");
+      const searchQuery = (searchInputElement?.value || "")
+        .toLowerCase()
+        .trim();
+
+      if (!searchQuery) {
+        renderTestsLists();
+        return;
+      }
+
+      const matchesSearchQuery = (testObject) => {
+        const compositeString = [
+          testObject.testName,
+          testObject.subject,
+          testObject.testId,
+          testObject.category
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return compositeString.includes(searchQuery);
+      };
+
+      const filteredUpcomingTests = filterTestsByDifficultyOnly(
+        testsDataObject.upcoming
+      ).filter(matchesSearchQuery);
+
+      const filteredCompletedTests = filterTestsByDifficultyOnly(
+        testsDataObject.completed
+      ).filter(matchesSearchQuery);
+
+      const upcomingContainer = byId("upcomingTestsList");
+      const completedContainer = byId("completedTestsList");
+      const upcomingEmptyCard = byId("upcomingEmptyStateCard");
+      const completedEmptyCard = byId("completedEmptyStateCard");
+
+      if (!upcomingContainer || !completedContainer) return;
+
+      upcomingContainer.innerHTML = "";
+      completedContainer.innerHTML = "";
+
+      if (!filteredUpcomingTests.length) {
+        if (upcomingEmptyCard) {
+          upcomingContainer.appendChild(upcomingEmptyCard);
+        }
+      } else {
+        filteredUpcomingTests.forEach((testObject) => {
+          upcomingContainer.appendChild(
+            buildUpcomingTestCard(testObject)
+          );
+        });
+      }
+
+      if (!filteredCompletedTests.length) {
+        if (completedEmptyCard) {
+          completedContainer.appendChild(completedEmptyCard);
+        }
+      } else {
+        filteredCompletedTests.forEach((testObject) => {
+          completedContainer.appendChild(
+            buildCompletedTestCard(testObject)
+          );
+        });
+      }
+    }
+
+    function filterByDifficulty(difficultyKey) {
+      currentDifficultyFilter = difficultyKey;
+
+      document
+        .querySelectorAll(".tests-chip[data-filter]")
+        .forEach((buttonElement) => {
+          const isActive =
+            buttonElement.getAttribute("data-filter") ===
+            difficultyKey;
+          if (isActive) {
+            buttonElement.classList.add("active");
+          } else {
+            buttonElement.classList.remove("active");
+          }
+        });
+
+      searchTests();
+    }
+
+    function handleTestsListClick(event) {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const startButton = target.closest(".js-start-test");
+      if (startButton) {
+        const testId = startButton.getAttribute("data-test-id");
+        startTest(testId);
+        return;
+      }
+
+      const viewButton = target.closest(".js-view-analysis");
+      if (viewButton) {
+        const testId = viewButton.getAttribute("data-test-id");
+        viewTestResults(testId);
+      }
+    }
+
+    function startTest(testId) {
+      if (!testId) return;
+      window.alert(`Starting test ${testId}`);
+      // TODO: redirect to real test-player page
+    }
+
+    function viewTestResults(testId) {
+      if (!testId) return;
+      window.alert(`Opening results for ${testId}`);
+      // TODO: redirect to real results/analysis page
+    }
+  </script>
 </body>
 </html>
