@@ -8,7 +8,6 @@
   />
   <title>Exam Verse | Student Dashboard</title>
 
-  <!-- Icons + Fonts -->
   <link
     rel="stylesheet"
     href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
@@ -18,7 +17,6 @@
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
   />
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 
   <style>
@@ -36,6 +34,7 @@
       --light-card: #ffffff;
       --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --text-muted: #666;
+      --story-ring: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     }
 
     body {
@@ -44,11 +43,16 @@
       color: #333;
       min-height: 100vh;
       transition: all 0.3s ease;
+      overflow: hidden; /* Prevent body scroll */
     }
 
     body.dark {
       background: var(--dark-bg);
       color: #fff;
+    }
+    
+    .hidden {
+      display: none !important;
     }
 
     /* Header */
@@ -72,42 +76,18 @@
       border-color: rgba(255, 255, 255, 0.08);
     }
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .brand-row {
-      display: flex;
-      gap: 4px;
-      align-items: baseline;
-    }
-
     .brand-title {
       font-weight: 700;
       font-size: 18px;
       letter-spacing: 0.5px;
       color: var(--primary);
-      text-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
-    }
-
-    .version-capsule {
-      display: inline-block;
-      padding: 3px 10px;
-      background: rgba(26, 115, 232, 0.1);
-      color: var(--primary);
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      border-radius: 999px;
     }
 
     .header-right {
       display: flex;
       align-items: center;
       gap: 10px;
+      position: relative; 
     }
 
     .header-icon-wrapper {
@@ -186,52 +166,49 @@
       color: var(--primary);
     }
 
-    .sun-icon {
-      opacity: 1;
-      transform: rotate(0deg) scale(1);
-    }
-
-    body.dark .sun-icon {
-      opacity: 0;
-      transform: rotate(180deg) scale(0.5);
-    }
-
-    .moon-icon {
-      opacity: 0;
-      transform: rotate(-180deg) scale(0.5);
-    }
-
-    body.dark .moon-icon {
-      opacity: 1;
-      transform: rotate(0deg) scale(1);
-    }
+    .sun-icon { opacity: 1; transform: rotate(0deg) scale(1); }
+    body.dark .sun-icon { opacity: 0; transform: rotate(180deg) scale(0.5); }
+    .moon-icon { opacity: 0; transform: rotate(-180deg) scale(0.5); }
+    body.dark .moon-icon { opacity: 1; transform: rotate(0deg) scale(1); }
 
     /* Layout */
     .main {
       margin-top: 60px;
-      margin-bottom: 60px;
-      padding: 16px;
-      min-height: calc(100vh - 120px);
+      margin-bottom: 56px; /* Match bottom nav height */
+      padding: 0; /* Remove padding for full-bleed tabs */
+      height: calc(100vh - 116px); /* Full height */
+      overflow-y: auto; /* Allow scrolling on tabs that need it */
     }
-
+    
     .tab-content {
       display: none;
+      height: 100%;
+      overflow-y: auto;
     }
-
     .tab-content.active {
       display: block;
-      animation: fadeIn 0.25s;
+    }
+    
+    /* Give padding back to non-social tabs */
+    #homeTab, #testsTab, #leaderboardTab, #profileTab {
+      padding: 16px;
+      overflow-y: auto; /* Ensure they scroll */
+    }
+    
+    /* Media tab needs to be full height */
+    #mediaTab {
+      overflow-y: hidden;
+      display: none; /* Handled by .active */
+      flex-direction: column;
+    }
+    #mediaTab.active {
+      display: flex;
     }
 
+
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(4px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .card {
@@ -246,198 +223,34 @@
       background: var(--dark-card);
     }
 
-    /* Welcome card */
-    .welcome-card {
-      background: linear-gradient(135deg, #1a73e8, #5b9ef5);
+    /* Input field base */
+    .search-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .search-input-wrapper i {
+      position: absolute;
+      left: 12px;
+      top: 11px;
+      color: var(--text-muted);
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      border-radius: 10px;
+      border: 2px solid rgba(0, 0, 0, 0.08);
+      font-size: 14px;
+      font-family: "Poppins", sans-serif;
+      background: #f9f9f9;
+    }
+    body.dark .search-input {
+      background: #1e1e1e;
+      border-color: #333;
       color: #fff;
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
     }
-
-    .welcome-main {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .welcome-title {
-      font-size: 22px;
-      font-weight: 600;
-    }
-
-    .welcome-roll {
-      font-size: 13px;
-      opacity: 0.9;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .welcome-roll i {
-      font-size: 16px;
-    }
-
-    .welcome-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-    }
-
-    /* Stats grids */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 900px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    .stat-card {
-      background: var(--light-card);
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: var(--shadow);
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      transition: transform 0.2s;
-    }
-
-    body.dark .stat-card {
-      background: var(--dark-card);
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .stat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-    }
-
-    .stat-icon {
-      font-size: 18px;
-      color: var(--primary);
-    }
-
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .stat-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* Mini analytics */
-    .mini-analytics {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    @media (max-width: 900px) {
-      .mini-analytics {
-        grid-template-columns: repeat(1, minmax(0, 1fr));
-      }
-    }
-
-    .mini-card {
-      background: var(--light-card);
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    body.dark .mini-card {
-      background: var(--dark-card);
-    }
-
-    .mini-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      background: rgba(26, 115, 232, 0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
-      font-size: 16px;
-    }
-
-    .mini-content {
-      flex: 1;
-    }
-
-    .mini-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    .mini-value {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    /* Charts */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 900px) {
-      .charts-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .chart-container {
-      height: 260px;
-    }
-
-    .chart-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .chart-title i {
-      color: var(--primary);
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
     }
 
     /* Bottom nav */
@@ -454,12 +267,10 @@
       justify-content: space-around;
       z-index: 1000;
     }
-
     body.dark .bottom-nav {
       background: #1e1e1e;
       border-color: rgba(255, 255, 255, 0.08);
     }
-
     .nav-item {
       flex: 1;
       text-align: center;
@@ -470,591 +281,760 @@
       background: none;
       border: none;
     }
-
-    .nav-item i {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 2px;
-    }
-
-    .nav-item.active {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .nav-item.active i {
-      color: var(--primary);
-    }
+    .nav-item i { display: block; font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--primary); font-weight: 600; }
+    .nav-item.active i { color: var(--primary); }
 
     /* Footer */
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 8px;
-    }
+    .footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+    .footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .footer a:hover { text-decoration: underline; }
 
-    .footer a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-    }
+    /* --- Stats & Charts (Same as before) --- */
+    .welcome-card { background: linear-gradient(135deg, #1a73e8, #5b9ef5); color: #fff; border-radius: 16px; padding: 22px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .welcome-main { display: flex; flex-direction: column; gap: 4px; }
+    .welcome-title { font-size: 22px; font-weight: 600; }
+    .welcome-roll { font-size: 13px; opacity: 0.9; display: flex; align-items: center; gap: 6px; }
+    .welcome-roll i { font-size: 16px; }
+    .welcome-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .stat-card { background: var(--light-card); border-radius: 12px; padding: 12px; box-shadow: var(--shadow); text-align: left; display: flex; flex-direction: column; gap: 4px; transition: transform 0.2s; }
+    body.dark .stat-card { background: var(--dark-card); }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
+    .stat-icon { font-size: 18px; color: var(--primary); }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+    .stat-sub { font-size: 11px; color: var(--text-muted); }
+    .mini-analytics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+    @media (max-width: 900px) { .mini-analytics { grid-template-columns: repeat(1, minmax(0, 1fr)); } }
+    .mini-card { background: var(--light-card); border-radius: 12px; padding: 12px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; }
+    body.dark .mini-card { background: var(--dark-card); }
+    .mini-icon { width: 32px; height: 32px; border-radius: 999px; background: rgba(26, 115, 232, 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 16px; }
+    .mini-content { flex: 1; }
+    .mini-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .mini-value { font-size: 16px; font-weight: 600; }
+    .charts-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr); gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: minmax(0, 1fr); } }
+    .chart-container { height: 260px; }
+    .chart-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .chart-title i { color: var(--primary); }
 
-    .footer a:hover {
-      text-decoration: underline;
-    }
+    /* --- Tests Tab (Same as before) --- */
+    .tests-header h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .tests-subtitle { font-size: 12px; color: var(--text-muted); }
+    .tests-search-row { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .tests-quick-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tests-chip { border-radius: 999px; border: 1px solid var(--primary); background: transparent; color: var(--primary); padding: 6px 12px; font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
+    .tests-chip i { font-size: 14px; }
+    .tests-chip:hover, .tests-chip.active { background: var(--primary); color: #fff; }
+    .tests-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .tests-section-header h4 { font-size: 14px; font-weight: 600; }
+    .tests-section-header p { font-size: 12px; color: var(--text-muted); }
+    .tests-view-all { border: none; background: rgba(26, 115, 232, 0.08); color: var(--primary); font-size: 11px; padding: 6px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .tests-view-all i { font-size: 14px; }
+    .tests-list { display: flex; flex-direction: column; gap: 10px; }
+    .test-card { background: var(--light-card); border-radius: 10px; padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; border-left: 3px solid var(--primary); }
+    body.dark .test-card { background: var(--dark-card); }
+    .test-top-row { display: flex; justify-content: space-between; align-items: center; }
+    .test-title { font-size: 14px; font-weight: 600; }
+    .test-id { font-size: 11px; color: var(--text-muted); }
+    .test-meta-row { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-muted); }
+    .test-meta-pill { display: inline-flex; align-items: center; gap: 6px; }
+    .test-meta-pill i { font-size: 13px; }
+    .test-bottom-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 11px; }
+    .test-difficulty-pill { padding: 3px 8px; border-radius: 999px; font-weight: 600; text-transform: capitalize; }
+    .test-difficulty-easy { background: rgba(52, 199, 89, 0.12); color: #34c759; }
+    .test-difficulty-medium { background: rgba(251, 188, 5, 0.12); color: #fbbc05; }
+    .test-difficulty-hard { background: rgba(234, 67, 53, 0.12); color: #ea4335; }
+    .test-btn-primary { border: none; background: var(--primary); color: #fff; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .test-btn-primary i { font-size: 14px; }
+    .tests-empty { align-items: center; text-align: center; border-left: none; padding: 20px; }
+    .tests-empty-icon { font-size: 24px; color: var(--text-muted); margin-bottom: 4px; }
+    .tests-empty-text { font-size: 12px; color: var(--text-muted); }
 
-    /* Tests tab */
-    .tests-header h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
+    /* --- Leaderboard (Same as before) --- */
+    .leaderboard-header { margin-bottom: 16px; }
+    .leaderboard-title { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .leaderboard-title i { font-size: 24px; color: var(--primary); }
+    .leaderboard-title h3 { font-size: 18px; font-weight: 600; margin: 0; }
+    .leaderboard-subtitle { font-size: 12px; color: var(--text-muted); }
+    .leaderboard-search { margin-top: 16px; margin-bottom: 16px; }
+    .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
+    .leaderboard-item { display: grid; grid-template-columns: 24px 36px 1fr auto auto; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: rgba(0, 0, 0, 0.02); border: 1px solid rgba(0, 0, 0, 0.05); }
+    body.dark .leaderboard-item { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+    .leaderboard-item.loading-placeholder { display: flex; justify-content: center; color: var(--text-muted); font-size: 13px; padding: 24px; }
+    .leaderboard-item.user-self { background: rgba(26, 115, 232, 0.1); border-color: var(--primary); }
+    body.dark .leaderboard-item.user-self { background: rgba(26, 115, 232, 0.15); }
+    .leaderboard-rank { font-size: 14px; font-weight: 700; color: var(--text-muted); text-align: center; }
+    .leaderboard-item.rank-1 .leaderboard-rank { color: #fbbc05; }
+    .leaderboard-item.rank-2 .leaderboard-rank { color: #c0c0c0; }
+    .leaderboard-item.rank-3 .leaderboard-rank { color: #cd7f32; }
+    .leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; flex-shrink: 0; }
+    .leaderboard-details { flex: 1; line-height: 1.4; overflow: hidden; }
+    .leaderboard-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .leaderboard-roll { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .leaderboard-item.user-self .leaderboard-name { color: var(--primary); }
+    .leaderboard-private-badge { font-size: 9px; font-weight: 600; background: #777; color: #fff; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+    body.dark .leaderboard-private-badge { background: #999; color: #111; }
+    .leaderboard-score-wrapper { text-align: right; }
+    .leaderboard-score { font-size: 15px; font-weight: 700; color: var(--primary); }
+    .leaderboard-score-label { font-size: 10px; color: var(--text-muted); text-align: right; }
+    .leaderboard-actions { display: flex; flex-direction: column; gap: 6px; }
+    .leaderboard-btn { border: none; background: rgba(0,0,0,0.05); color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+    body.dark .leaderboard-btn { background: rgba(255,255,255,0.1); color: #eee; }
+    .leaderboard-btn:hover { background: rgba(0,0,0,0.1); }
+    body.dark .leaderboard-btn:hover { background: rgba(255,255,255,0.2); }
+    .leaderboard-btn.follow { background: var(--primary); color: #fff; }
+    .leaderboard-btn.requested { background: #777; color: #fff; }
+    .leaderboard-btn i { font-size: 13px; }
+    @media (max-width: 600px) {
+      .leaderboard-item { grid-template-columns: 24px 36px 1fr; gap: 10px; row-gap: 12px; position: relative; }
+      .leaderboard-score-wrapper { position: absolute; top: 12px; right: 12px; }
+      .leaderboard-actions { grid-column: 2 / span 2; flex-direction: row; justify-content: flex-start; }
     }
+    .compare-card { text-align: center; }
+    .compare-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .compare-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .compare-btn { border: none; background: var(--primary); color: #fff; padding: 10px 20px; font-weight: 600; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .compare-btn i { font-size: 18px; }
 
-    .tests-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    /* --- Profile Tab (Same as before) --- */
+    .profile-title { margin-bottom: 10px; }
+    .profile-logout-button { margin-top: 12px; }
+    
+    /* ================================== */
+    /* STYLES FOR NOTIFICATION PANEL */
+    /* ================================== */
+    .notifications-panel { display: none; position: absolute; top: 56px; right: 16px; width: calc(100vw - 32px); max-width: 360px; background: var(--light-card); border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); border: 1px solid rgba(0, 0, 0, 0.1); z-index: 1100; overflow: hidden; animation: slideInDown 0.3s ease-out; }
+    body.dark .notifications-panel { background: var(--dark-card); border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .notifications-panel.show { display: block; }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .notifications-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+    body.dark .notifications-header { border-color: rgba(255, 255, 255, 0.1); }
+    .notifications-header h4 { font-size: 15px; font-weight: 600; margin: 0; }
+    .notifications-close-btn { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 50%; line-height: 1; }
+    .notifications-close-btn:hover { background: rgba(0, 0, 0, 0.05); }
+    body.dark .notifications-close-btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .notifications-body { max-height: 400px; overflow-y: auto; }
+    .notification-item { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.05); transition: background-color 0.2s; cursor: pointer; }
+    .notification-item:last-child { border-bottom: none; }
+    .notification-item:hover { background: rgba(26, 115, 232, 0.05); }
+    body.dark .notification-item { border-color: rgba(255, 255, 255, 0.08); }
+    body.dark .notification-item:hover { background: rgba(26, 115, 232, 0.1); }
+    .notification-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .notification-item.type-alert .notification-icon { background: rgba(234, 67, 53, 0.12); color: #ea4335; }
+    .notification-item.type-test .notification-icon { background: rgba(26, 115, 232, 0.12); color: var(--primary); }
+    .notification-item.type-rank .notification-icon { background: rgba(251, 188, 5, 0.12); color: #fbbc05; }
+    .notification-item.empty { cursor: default; }
+    .notification-item.empty:hover { background: none; }
+    .notification-item.empty .notification-icon { background: rgba(0, 0, 0, 0.05); color: var(--text-muted); }
+    body.dark .notification-item.empty .notification-icon { background: rgba(255, 255, 255, 0.1); }
+    .notification-content { flex: 1; }
+    .notification-text { font-size: 13px; display: block; line-height: 1.5; font-weight: 500; }
+    .notification-time { font-size: 11px; color: var(--text-muted); }
+    .notifications-footer { padding: 10px 16px; text-align: center; border-top: 1px solid rgba(0, 0, 0, 0.08); }
+    body.dark .notifications-footer { border-color: rgba(255, 255, 255, 0.1); }
+    .notifications-footer a { font-size: 12px; font-weight: 600; color: var(--primary); text-decoration: none; }
 
-    .tests-search-row {
-      margin-top: 12px;
+
+    /* ================================== */
+    /* STYLES FOR MEDIA TAB (NEW) */
+    /* ================================== */
+    .media-tab-layout {
+      max-width: 680px;
+      margin: 0 auto;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 10px;
     }
-
-    .tests-search-wrapper {
-      position: relative;
-      flex: 1;
-    }
-
-    .tests-search-wrapper i {
-      position: absolute;
-      left: 12px;
-      top: 11px;
-      color: var(--text-muted);
-    }
-
-    .tests-search-input {
-      width: 100%;
-      padding: 10px 12px 10px 38px;
-      border-radius: 10px;
-      border: 2px solid rgba(0, 0, 0, 0.08);
-      font-size: 14px;
-      font-family: "Poppins", sans-serif;
-      background: #f9f9f9;
-    }
-
-    body.dark .tests-search-input {
-      background: #1e1e1e;
-      border-color: #333;
-      color: #fff;
-    }
-
-    .tests-quick-filters {
+    
+    .media-sub-nav {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
+      padding: 16px 16px 0; /* Add padding to match layout */
+      flex-shrink: 0;
     }
-
-    .tests-chip {
-      border-radius: 999px;
-      border: 1px solid var(--primary);
-      background: transparent;
-      color: var(--primary);
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .tests-chip i {
+    .media-sub-nav-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: var(--light-card);
+      box-shadow: var(--shadow);
       font-size: 14px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-
-    .tests-chip:hover,
-    .tests-chip.active {
+    body.dark .media-sub-nav-btn {
+      background: var(--dark-card);
+      color: #aaa;
+    }
+    .media-sub-nav-btn.active {
       background: var(--primary);
       color: #fff;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
     }
-
-    .tests-section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
+    
+    .media-sub-tab {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px; /* Add padding */
     }
-
-    .tests-section-header h4 {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .tests-section-header p {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .tests-view-all {
-      border: none;
-      background: rgba(26, 115, 232, 0.08);
-      color: var(--primary);
-      font-size: 11px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-
-    .tests-view-all i {
-      font-size: 14px;
-    }
-
-    .tests-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .test-card {
+    
+    /* --- Stories Bar (NEW) --- */
+    .stories-bar {
       background: var(--light-card);
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 12px 0 12px 12px;
+      margin-bottom: 16px;
       box-shadow: var(--shadow);
       display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .stories-bar::-webkit-scrollbar { display: none; }
+    body.dark .stories-bar { background: var(--dark-card); }
+    .story-item { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 70px; flex-shrink: 0; cursor: pointer; }
+    .story-avatar-wrapper { width: 60px; height: 60px; border-radius: 50%; padding: 2px; background: var(--story-ring); }
+    .story-avatar-wrapper.self { background: #ccc; }
+    .story-avatar { width: 100%; height: 100%; border-radius: 50%; background: var(--light-card); padding: 2px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600; color: var(--primary); }
+    body.dark .story-avatar { background: var(--dark-bg); }
+    .story-avatar.self-icon { background: #eee; color: var(--primary); }
+    body.dark .story-avatar.self-icon { background: #444; }
+    .story-name { font-size: 11px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: center; }
+    body.dark .story-name { color: #eee; }
+    
+    /* --- Create Post --- */
+    .create-post-card { padding: 12px 16px; display: flex; gap: 12px; align-items: flex-start; }
+    .create-post-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; flex-shrink: 0; }
+    .create-post-body { width: 100%; }
+    .create-post-textarea { width: 100%; border: none; background: transparent; font-family: 'Poppins', sans-serif; font-size: 16px; min-height: 80px; resize: vertical; padding: 8px 0; color: inherit; }
+    .create-post-textarea:focus { outline: none; }
+    body.dark .create-post-textarea { color: #fff; }
+    .create-post-preview-container { position: relative; margin-bottom: 10px; }
+    .create-post-preview-img { width: 100%; border-radius: 10px; max-height: 300px; object-fit: cover; }
+    .create-post-remove-img-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 24px; }
+    .create-post-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.08); }
+    body.dark .create-post-actions { border-color: rgba(255,255,255,0.1); }
+    .create-post-icon-btn { background: none; border: none; color: var(--primary); font-size: 22px; cursor: pointer; padding: 6px; border-radius: 50%; }
+    .create-post-icon-btn:hover { background: rgba(26, 115, 232, 0.1); }
+    .create-post-btn { background: var(--primary); color: #fff; border: none; padding: 8px 20px; font-weight: 600; border-radius: 999px; cursor: pointer; }
+    .create-post-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    .feed-list { display: flex; flex-direction: column; gap: 16px; }
+    .feed-list .card { padding: 0; overflow: hidden; }
+    .post-header { display: flex; gap: 12px; align-items: center; padding: 12px 16px; }
+    .post-avatar { width: 40px; height: 40px; border-radius: 50%; background: #eee; color: #333; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; flex-shrink: 0; }
+    body.dark .post-avatar { background: #444; color: #fff; }
+    .post-user-info { flex: 1; }
+    .post-user-name { font-weight: 600; font-size: 15px; }
+    .post-user-roll { font-size: 12px; color: var(--text-muted); line-height: 1; }
+    .post-menu-btn { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 50%; }
+    .post-menu-btn:hover { background: rgba(0,0,0,0.05); }
+    body.dark .post-menu-btn:hover { background: rgba(255,255,255,0.1); }
+    .post-content-text { padding: 0 16px 12px 16px; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+    .post-content-image { width: 100%; max-height: 600px; object-fit: cover; display: block; background: #f0f0f0; }
+    body.dark .post-content-image { background: #333; }
+    .post-stats { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); padding: 10px 16px; }
+    .post-actions { display: flex; justify-content: space-around; border-top: 1px solid rgba(0,0,0,0.08); padding: 4px 0; }
+    body.dark .post-actions { border-color: rgba(255,255,255,0.1); }
+    .post-action-btn { flex: 1; background: none; border: none; color: var(--text-muted); font-size: 14px; font-weight: 500; padding: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; }
+    .post-action-btn:hover { background: rgba(0,0,0,0.05); }
+    body.dark .post-action-btn:hover { background: rgba(255,255,255,0.1); }
+    .post-action-btn i { font-size: 20px; }
+    .post-action-btn.liked { color: var(--primary); font-weight: 600; }
+    .post-comments-container { padding: 0 16px 12px; border-top: 1px solid rgba(0,0,0,0.08); }
+    body.dark .post-comments-container { border-color: rgba(255,255,255,0.1); }
+    .post-comment-list { display: flex; flex-direction: column; gap: 12px; max-height: 200px; overflow-y: auto; margin-bottom: 12px; padding-top: 12px; }
+    .post-comment-item { display: flex; gap: 10px; font-size: 13px; }
+    .comment-avatar { width: 28px; height: 28px; border-radius: 50%; background: #eee; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+    body.dark .comment-avatar { background: #444; }
+    .comment-name { font-weight: 600; margin-right: 6px; }
+    .post-comment-input-wrapper { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.08); }
+    body.dark .post-comment-input-wrapper { border-color: rgba(255,255,255,0.1); }
+    .post-comment-input { flex: 1; border: 1px solid rgba(0,0,0,0.1); background: #f9f9f9; border-radius: 999px; padding: 8px 12px; font-size: 13px; font-family: 'Poppins', sans-serif; }
+    body.dark .post-comment-input { background: #333; border-color: #555; color: #fff; }
+    .post-comment-input:focus { outline: none; border-color: var(--primary); }
+    .post-comment-submit-btn { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    /* ================================== */
+    /* STYLES FOR STORY VIEWER (NEW) */
+    /* ================================== */
+    .story-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .story-viewer.show { opacity: 1; visibility: visible; }
+    .story-viewer-content { width: 100%; height: 100%; max-width: 400px; max-height: 90vh; background: #000; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); transition: all 0.3s ease; }
+    .story-viewer.show .story-viewer-content { transform: scale(1); }
+    .story-viewer-image { width: 100%; height: 100%; object-fit: cover; }
+    .story-viewer-header { position: absolute; top: 0; left: 0; width: 100%; padding: 12px; display: flex; align-items: center; gap: 10px; background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%); }
+    .story-viewer-avatar { width: 32px; height: 32px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; }
+    .story-viewer-name { color: #fff; font-weight: 600; font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+    .story-viewer-close { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.4); color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 20px; cursor: pointer; line-height: 32px; }
+
+    /* ================================== */
+    /* STYLES FOR CHAT TAB (NEW) */
+    /* ================================== */
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      height: 100%;
+      overflow: hidden;
+      background: var(--light-card);
+    }
+    body.dark .chat-layout {
+        background: var(--dark-bg);
+    }
+    
+    /* --- Chat List (Left Panel) --- */
+    .chat-list-panel {
+      display: flex;
       flex-direction: column;
-      gap: 6px;
-      border-left: 3px solid var(--primary);
+      height: 100%;
+      background: var(--light-card);
+      border-right: 1px solid rgba(0,0,0,0.08);
+    }
+    body.dark .chat-list-panel {
+      background: var(--dark-bg);
+      border-color: rgba(255,255,255,0.1);
     }
 
-    body.dark .test-card {
-      background: var(--dark-card);
+    .chat-list-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      flex-shrink: 0;
     }
-
-    .test-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    body.dark .chat-list-header {
+      border-color: rgba(255,255,255,0.1);
     }
-
-    .test-title {
-      font-size: 14px;
-      font-weight: 600;
+    .chat-list-header .search-input {
+      background: var(--light-bg);
     }
-
-    .test-id {
-      font-size: 11px;
-      color: var(--text-muted);
+    body.dark .chat-list-header .search-input {
+      background: #1e1e1e;
     }
-
-    .test-meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 11px;
-      color: var(--text-muted);
+    
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
     }
-
-    .test-meta-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+    
+    .chat-list-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
     }
-
-    .test-meta-pill i {
-      font-size: 13px;
+    body.dark .chat-list-item {
+      border-color: rgba(255,255,255,0.08);
     }
-
-    .test-bottom-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 4px;
-      font-size: 11px;
+    .chat-list-item:hover {
+      background: rgba(0,0,0,0.03);
     }
-
-    .test-difficulty-pill {
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-weight: 600;
-      text-transform: capitalize;
+    body.dark .chat-list-item:hover {
+      background: rgba(255,255,255,0.05);
     }
-
-    .test-difficulty-easy {
-      background: rgba(52, 199, 89, 0.12);
-      color: #34c759;
-    }
-
-    .test-difficulty-medium {
-      background: rgba(251, 188, 5, 0.12);
-      color: #fbbc05;
-    }
-
-    .test-difficulty-hard {
-      background: rgba(234, 67, 53, 0.12);
-      color: #ea4335;
-    }
-
-    .test-btn-primary {
-      border: none;
+    .chat-list-item.active {
       background: var(--primary);
       color: #fff;
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 12px;
+    }
+    .chat-list-item.active .chat-list-preview,
+    .chat-list-item.active .chat-list-time {
+      color: #fff;
+      opacity: 0.9;
+    }
+
+    .chat-list-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
       font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
+    }
+
+    .chat-list-info {
+      overflow: hidden;
+    }
+    .chat-list-top {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
-    }
-
-    .test-btn-primary i {
-      font-size: 14px;
-    }
-
-    .tests-empty {
-      align-items: center;
-      text-align: center;
-      border-left: none;
-    }
-
-    .tests-empty-icon {
-      font-size: 24px;
-      color: var(--text-muted);
       margin-bottom: 4px;
     }
-
-    .tests-empty-text {
-      font-size: 12px;
+    .chat-list-name {
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-list-time {
+      font-size: 11px;
       color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .chat-list-preview {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      justify-content: space-between;
+    }
+    .chat-list-preview .badge {
+        position: static; /* Override badge default */
+        min-width: 20px;
+        height: 20px;
+        font-size: 12px;
+    }
+    
+    /* --- Chat Window (Right Panel) --- */
+    .chat-window {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .chat-window-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--light-card);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+    body.dark .chat-window-header {
+      background: var(--dark-card);
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .chat-window-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 18px;
+    }
+    body.dark .chat-window-avatar {
+      background: #444;
     }
 
-    .profile-title {
-      margin-bottom: 10px;
+    .chat-window-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    body.dark .chat-messages {
+      background: #222;
+    }
+    
+    .chat-message {
+      padding: 10px 14px;
+      border-radius: 18px;
+      max-width: 70%;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    .message-sent {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      align-self: flex-end;
+    }
+    
+    .message-received {
+      background: var(--light-card);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+    }
+    body.dark .message-received {
+      background: var(--dark-card);
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .chat-placeholder {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 10px;
+        color: var(--text-muted);
+        text-align: center;
+        padding: 20px;
+    }
+    .chat-placeholder i {
+        font-size: 50px;
     }
 
-    .profile-logout-button {
-      margin-top: 12px;
+    .chat-input-area {
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--light-card);
+      border-top: 1px solid rgba(0,0,0,0.08);
+      flex-shrink: 0;
     }
+    body.dark .chat-input-area {
+      background: var(--dark-card);
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .chat-input {
+      flex: 1;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: #f9f9f9;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 15px;
+      font-family: 'Poppins', sans-serif;
+    }
+    body.dark .chat-input {
+      background: #333;
+      border-color: #555;
+      color: #fff;
+    }
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .chat-send-btn {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .chat-input-area.disabled {
+        display: none;
+    }
+
+    /* --- Chat Mobile View --- */
+    @media (max-width: 768px) {
+      .chat-layout {
+        grid-template-columns: 1fr;
+      }
+      .chat-list-panel {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        border-right: none;
+      }
+      .chat-list-panel.mobile-active {
+        transform: translateX(0);
+      }
+      .chat-window {
+        position: absolute;
+        inset: 0;
+        z-index: 99;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      .chat-window.mobile-active {
+        transform: translateX(0);
+      }
+      .chat-window-header {
+        gap: 8px;
+      }
+      .chat-back-btn { /* New button for mobile nav */
+        background: none;
+        border: none;
+        font-size: 24px;
+        padding: 6px;
+        margin-left: -6px;
+        cursor: pointer;
+        color: var(--text-muted);
+        display: block; /* Show on mobile */
+      }
+      body.dark .chat-back-btn {
+        color: #eee;
+      }
+    }
+    @media (min-width: 769px) {
+        .chat-back-btn {
+            display: none; /* Hide on desktop */
+        }
+    }
+
   </style>
 </head>
 <body>
-  <!-- HEADER -->
   <header class="header">
     <div class="brand">
-      <div class="brand-row">
-        <span class="brand-title">Exam</span>
-        <span class="brand-title">Verse</span>
-      </div>
-      <span class="version-capsule">Version 1.0</span>
+      <span class="brand-title">Exam Verse</span>
     </div>
     <div class="header-right">
       <div class="header-icon-wrapper">
-        <button
-          id="notificationButton"
-          class="icon-button"
-          type="button"
-          aria-label="Open notifications"
-          style="background:none;border:none;padding:0;"
-        >
+        <button id="notificationButton" class="icon-button" type="button" aria-label="Open notifications" style="background:none;border:none;padding:0;">
           <i class="las la-bell header-icon" aria-hidden="true"></i>
-          <span class="badge" id="notificationBadge">3</span>
+          <span class="badge" id="notificationBadge">0</span>
         </button>
       </div>
-
-      <button
-        id="themeToggleButton"
-        class="theme-toggle"
-        type="button"
-        aria-label="Toggle theme"
-      >
-        <svg
-          class="theme-icon sun-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="5" />
-          <line x1="12" y1="1" x2="12" y2="3" />
-          <line x1="12" y1="21" x2="12" y2="23" />
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-          <line x1="1" y1="12" x2="3" y2="12" />
-          <line x1="21" y1="12" x2="23" y2="12" />
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-        </svg>
-        <svg
-          class="theme-icon moon-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-          />
-        </svg>
+      <button id="themeToggleButton" class="theme-toggle" type="button" aria-label="Toggle theme">
+        <svg class="theme-icon sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"> <circle cx="12" cy="12" r="5" /> <line x1="12" y1="1" x2="12" y2="3" /> <line x1="12" y1="21" x2="12" y2="23" /> <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /> <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /> <line x1="1" y1="12" x2="3" y2="12" /> <line x1="21" y1="12" x2="23" y2="12" /> <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /> <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /> </svg>
+        <svg class="theme-icon moon-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /> </svg>
       </button>
-
-      <button
-        id="profileAvatarButton"
-        class="avatar"
-        type="button"
-        aria-label="Open profile tab"
-      >
+      <button id="profileAvatarButton" class="avatar" type="button" aria-label="Open profile tab">
         <span id="userInitial">S</span>
       </button>
+      <div class="notifications-panel" id="notificationsPanel">
+        <div class="notifications-header">
+          <h4>Notifications</h4>
+          <button class="notifications-close-btn" id="notificationsCloseBtn" aria-label="Close notifications"><i class="las la-times"></i></button>
+        </div>
+        <div class="notifications-body" id="notificationsBody">
+          <div class="notification-item empty">
+            <div class="notification-icon"><i class="las la-bell-slash"></i></div>
+            <div class="notification-content"><span class="notification-text">No new notifications.</span></div>
+          </div>
+        </div>
+        <div class="notifications-footer"><a href="#">View all notifications</a></div>
+      </div>
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="main">
-    <!-- HOME TAB -->
-    <section
-      id="homeTab"
-      class="tab-content active"
-      role="tabpanel"
-      aria-labelledby="tab-home"
-      tabindex="0"
-    >
+  <main class="main" id="main">
+    <section id="homeTab" class="tab-content active" role="tabpanel">
       <div class="welcome-card">
         <div class="welcome-main">
-          <div class="welcome-title">
-            Welcome, <span id="userName">Student</span>!
-          </div>
-          <div class="welcome-roll">
-            <i class="las la-id-card" aria-hidden="true"></i>
-            <span id="userRoll">RollNumber</span>
-          </div>
+          <div class="welcome-title">Welcome, <span id="userName">Student</span>!</div>
+          <div class="welcome-roll"><i class="las la-id-card" aria-hidden="true"></i> <span id="userRoll">RollNumber</span></div>
         </div>
-        <div class="welcome-icon" aria-hidden="true">
-          <i class="las la-graduation-cap"></i>
-        </div>
+        <div class="welcome-icon" aria-hidden="true"><i class="las la-graduation-cap"></i></div>
       </div>
-
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-header">
-            <span>Total Tests</span>
-            <i class="las la-clipboard-list stat-icon" aria-hidden="true"></i>
-          </div>
+          <div class="stat-header"><span>Total Tests</span><i class="las la-clipboard-list stat-icon" aria-hidden="true"></i></div>
           <div class="stat-value" id="statTestsCompleted">0</div>
           <div class="stat-sub">Completed</div>
         </div>
-
         <div class="stat-card">
-          <div class="stat-header">
-            <span>Average Score</span>
-            <i class="las la-chart-bar stat-icon" aria-hidden="true"></i>
-          </div>
+          <div class="stat-header"><span>Average Score</span><i class="las la-chart-bar stat-icon" aria-hidden="true"></i></div>
           <div class="stat-value" id="statAverageScore">0.0</div>
           <div class="stat-sub">Overall</div>
         </div>
-
         <div class="stat-card">
-          <div class="stat-header">
-            <span>Global Rank</span>
-            <i class="las la-trophy stat-icon" aria-hidden="true"></i>
-          </div>
+          <div class="stat-header"><span>Global Rank</span><i class="las la-trophy stat-icon" aria-hidden="true"></i></div>
           <div class="stat-value" id="statGlobalRank">--</div>
           <div class="stat-sub">Leaderboard</div>
         </div>
-
         <div class="stat-card">
-          <div class="stat-header">
-            <span>Answer Accuracy</span>
-            <i class="las la-bullseye stat-icon" aria-hidden="true"></i>
-          </div>
+          <div class="stat-header"><span>Answer Accuracy</span><i class="las la-bullseye stat-icon" aria-hidden="true"></i></div>
           <div class="stat-value" id="statAnswerAccuracy">0</div>
           <div class="stat-sub">Correct answers</div>
         </div>
       </div>
-
       <div class="mini-analytics">
         <div class="mini-card">
-          <div class="mini-icon" aria-hidden="true">
-            <i class="las la-star"></i>
-          </div>
+          <div class="mini-icon" aria-hidden="true"><i class="las la-star"></i></div>
           <div class="mini-content">
             <div class="mini-label">Best Score</div>
             <div class="mini-value" id="miniBestScoreValue">0</div>
           </div>
         </div>
-
         <div class="mini-card">
-          <div class="mini-icon" aria-hidden="true">
-            <i class="las la-bolt"></i>
-          </div>
+          <div class="mini-icon" aria-hidden="true"><i class="las la-bolt"></i></div>
           <div class="mini-content">
             <div class="mini-label">Last Test</div>
             <div class="mini-value" id="miniLastTestScore">0</div>
           </div>
         </div>
-
         <div class="mini-card">
-          <div class="mini-icon" aria-hidden="true">
-            <i class="las la-fire"></i>
-          </div>
+          <div class="mini-icon" aria-hidden="true"><i class="las la-fire"></i></div>
           <div class="mini-content">
             <div class="mini-label">Daily Streak</div>
             <div class="mini-value" id="miniDailyStreak">0 days</div>
           </div>
         </div>
       </div>
-
       <div class="charts-grid">
         <div class="card">
-          <div class="chart-title">
-            <i class="las la-wave-square" aria-hidden="true"></i>
-            <span>Recent Test Scores</span>
-          </div>
-          <div class="chart-container">
-            <canvas id="recentScoresChartCanvas"></canvas>
-          </div>
+          <div class="chart-title"><i class="las la-wave-square" aria-hidden="true"></i> <span>Recent Test Scores</span></div>
+          <div class="chart-container"><canvas id="recentScoresChartCanvas"></canvas></div>
         </div>
-
         <div class="card">
-          <div class="chart-title">
-            <i class="las la-sitemap" aria-hidden="true"></i>
-            <span>Test Difficulty Distribution</span>
-          </div>
-          <div class="chart-container">
-            <canvas id="difficultyDistributionChartCanvas"></canvas>
-          </div>
+          <div class="chart-title"><i class="las la-sitemap" aria-hidden="true"></i> <span>Test Difficulty Distribution</span></div>
+          <div class="chart-container"><canvas id="difficultyDistributionChartCanvas"></canvas></div>
         </div>
       </div>
-
       <div class="card">
-        <div class="chart-title">
-          <i class="las la-layer-group" aria-hidden="true"></i>
-          <span>Subject Performance</span>
-        </div>
-        <div class="chart-container">
-          <canvas id="subjectPerformanceChartCanvas"></canvas>
-        </div>
+        <div class="chart-title"><i class="las la-layer-group" aria-hidden="true"></i> <span>Subject Performance</span></div>
+        <div class="chart-container"><canvas id="subjectPerformanceChartCanvas"></canvas></div>
       </div>
-
       <div class="footer">
-        Designed &amp; Developed by
-        <a
-          href="https://www.project-k.co.in"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Project K</a
-        >
+        Designed &amp; Developed by <a href="https://www.project-k.co.in" target="_blank" rel="noopener noreferrer">Project K</a>
       </div>
     </section>
 
-    <!-- TESTS TAB -->
-    <section
-      id="testsTab"
-      class="tab-content"
-      role="tabpanel"
-      aria-labelledby="tab-tests"
-      tabindex="0"
-    >
+    <section id="testsTab" class="tab-content" role="tabpanel">
       <div class="card">
         <div class="tests-header">
           <h3>Mock Tests</h3>
-          <span class="tests-subtitle"
-            >Plan, attempt, and review your exams in one place.</span
-          >
+          <span class="tests-subtitle">Plan, attempt, and review your exams in one place.</span>
         </div>
-
         <div class="tests-search-row">
-          <div class="tests-search-wrapper">
+          <div class="search-input-wrapper">
             <i class="las la-search" aria-hidden="true"></i>
-            <input
-              type="text"
-              id="testSearchInput"
-              class="tests-search-input"
-              placeholder="Search by test name, subject, or ID..."
-              autocomplete="off"
-              aria-label="Search tests by name, subject, or ID"
-            />
+            <input type="text" id="testSearchInput" class="search-input tests-search-input" placeholder="Search by test name, subject, or ID..." autocomplete="off" aria-label="Search tests by name, subject, or ID"/>
           </div>
-
-          <div
-            class="tests-quick-filters"
-            aria-label="Difficulty filters"
-          >
-            <button
-              class="tests-chip active"
-              type="button"
-              data-filter="all"
-            >
-              <i class="las la-layer-group" aria-hidden="true"></i>
-              <span>All</span>
-            </button>
-            <button
-              class="tests-chip"
-              type="button"
-              data-filter="easy"
-            >
-              <i class="las la-smile" aria-hidden="true"></i>
-              <span>Easy</span>
-            </button>
-            <button
-              class="tests-chip"
-              type="button"
-              data-filter="medium"
-            >
-              <i class="las la-adjust" aria-hidden="true"></i>
-              <span>Medium</span>
-            </button>
-            <button
-              class="tests-chip"
-              type="button"
-              data-filter="hard"
-            >
-              <i class="las la-fire" aria-hidden="true"></i>
-              <span>Hard</span>
-            </button>
+          <div class="tests-quick-filters" aria-label="Difficulty filters">
+            <button class="tests-chip active" type="button" data-filter="all"><i class="las la-layer-group" aria-hidden="true"></i> <span>All</span></button>
+            <button class="tests-chip" type="button" data-filter="easy"><i class="las la-smile" aria-hidden="true"></i> <span>Easy</span></button>
+            <button class="tests-chip" type="button" data-filter="medium"><i class="las la-adjust" aria-hidden="true"></i> <span>Medium</span></button>
+            <button class="tests-chip" type="button" data-filter="hard"><i class="las la-fire" aria-hidden="true"></i> <span>Hard</span></button>
           </div>
         </div>
       </div>
-
       <div class="card">
         <div class="tests-section-header">
           <div>
-            <h4>Upcoming Tests</h4>
-            <p id="upcomingSubtitle">Ready to attempt.</p>
+            <h4>Available Mocktests</h4>
+            <p id="availableSubtitle">Ready to attempt.</p>
           </div>
-          <button
-            id="reloadTestsButton"
-            class="tests-view-all"
-            type="button"
-          >
-            <i class="las la-sync-alt" aria-hidden="true"></i>
-            <span>Refresh</span>
-          </button>
+          <button id="reloadTestsButton" class="tests-view-all" type="button"><i class="las la-sync-alt" aria-hidden="true"></i> <span>Refresh</span></button>
         </div>
-        <div id="upcomingTestsList" class="tests-list">
-          <div
-            class="test-card tests-empty"
-            id="upcomingEmptyStateCard"
-          >
-            <div class="tests-empty-icon" aria-hidden="true">
-              <i class="las la-inbox"></i>
-            </div>
-            <div class="tests-empty-text">
-              No upcoming tests assigned yet.
-            </div>
+        <div id="availableTestsList" class="tests-list">
+          <div class="test-card tests-empty" id="availableEmptyStateCard">
+            <div class="tests-empty-icon" aria-hidden="true"><i class="las la-inbox"></i></div>
+            <div class="tests-empty-text">No tests are available right now.</div>
           </div>
         </div>
       </div>
-
       <div class="card">
         <div class="tests-section-header">
           <div>
@@ -1063,267 +1043,305 @@
           </div>
         </div>
         <div id="completedTestsList" class="tests-list">
-          <div
-            class="test-card tests-empty"
-            id="completedEmptyStateCard"
-          >
-            <div class="tests-empty-icon" aria-hidden="true">
-              <i class="las la-clipboard-check"></i>
-            </div>
-            <div class="tests-empty-text">
-              You haven't completed any tests yet.
-            </div>
+          <div class="test-card tests-empty" id="completedEmptyStateCard">
+            <div class="tests-empty-icon" aria-hidden="true"><i class="las la-clipboard-check"></i></div>
+            <div class="tests-empty-text">You haven't completed any tests yet.</div>
           </div>
         </div>
       </div>
-
       <div class="footer">
-        Designed &amp; Developed by
-        <a
-          href="https://www.project-k.co.in"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Project K</a
-        >
+        Designed &amp; Developed by <a href="https://www.project-k.co.in" target="_blank" rel="noopener noreferrer">Project K</a>
       </div>
     </section>
 
-    <!-- OTHER TABS -->
-    <section
-      id="leaderboardTab"
-      class="tab-content"
-      role="tabpanel"
-      aria-labelledby="tab-leaderboard"
-      tabindex="0"
-    >
+    <section id="leaderboardTab" class="tab-content" role="tabpanel">
       <div class="card">
-        Leaderboard tab content coming next.
+        <div class="leaderboard-header">
+          <div class="leaderboard-title"><i class="las la-trophy" aria-hidden="true"></i> <h3>Global Leaderboard</h3></div>
+          <span class="leaderboard-subtitle">See how you stack up against other students.</span>
+        </div>
+        <div class="leaderboard-search search-input-wrapper">
+          <i class="las la-search"></i>
+          <input type="text" id="leaderboardSearchInput" class="search-input" placeholder="Search by name or roll number...">
+        </div>
+        <div class="leaderboard-list" id="leaderboardList">
+          <div class="leaderboard-item loading-placeholder"><i class="las la-spinner la-spin"></i> <span>Loading rankings...</span></div>
+        </div>
+      </div>
+      <div class="card compare-card">
+          <h3>Compare Profiles</h3>
+          <p>See how you stack up against a classmate.</p>
+          <button class="compare-btn" id="compareBtn"><i class="las la-users"></i> Start Comparison</button>
+      </div>
+      <div class="footer">
+        Designed &amp; Developed by <a href="https://www.project-k.co.in" target="_blank" rel="noopener noreferrer">Project K</a>
       </div>
     </section>
 
-    <section
-      id="mediaTab"
-      class="tab-content"
-      role="tabpanel"
-      aria-labelledby="tab-media"
-      tabindex="0"
-    >
-      <div class="card">
-        Media Feed tab content coming next.
-      </div>
-    </section>
+    <section id="mediaTab" class="tab-content" role="tabpanel">
+      <div class="media-tab-layout">
+        
+        <div class="media-sub-nav">
+          <button class="media-sub-nav-btn active" data-subtab="feed">
+            <i class="las la-stream"></i> Feed
+          </button>
+          <button class="media-sub-nav-btn" data-subtab="messages">
+            <i class="las la-comment-dots"></i> Messages
+          </button>
+          <button class="media-sub-nav-btn" data-subtab="groups">
+            <i class="las la-users"></i> Groups
+          </button>
+        </div>
 
-    <section
-      id="profileTab"
-      class="tab-content"
-      role="tabpanel"
-      aria-labelledby="tab-profile"
-      tabindex="0"
-    >
+        <div class="media-sub-tab active" id="mediaFeedContent">
+          <div class="stories-bar" id="storiesBar">
+            </div>
+          <div class="card create-post-card">
+            <div class="create-post-avatar" id="createPostAvatar">S</div>
+            <div class="create-post-body">
+              <textarea id="createPostTextarea" class="create-post-textarea" placeholder="What's on your mind?"></textarea>
+              <div class="create-post-preview-container hidden" id="createPostPreviewContainer">
+                <button class="create-post-remove-img-btn" id="createPostRemoveImageBtn" aria-label="Remove image">&times;</button>
+                <img src="" alt="Image preview" class="create-post-preview-img" id="createPostPreviewImg">
+              </div>
+              <div class="create-post-actions">
+                <button class="create-post-icon-btn" id="createPostImageBtn" title="Add Image" aria-label="Add image"><i class="las la-image"></i></button>
+                <button class="create-post-btn" id="createPostSubmitBtn">Post</button>
+              </div>
+            </div>
+          </div>
+          <div class="feed-list" id="feedList">
+            <div class="card" id="feedLoadingPlaceholder">
+              <div class="leaderboard-item loading-placeholder"><i class="las la-spinner la-spin"></i> <span>Loading media feed...</span></div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="media-sub-tab hidden" id="mediaMessagesContent">
+          <div class="chat-layout">
+            <div class="chat-list-panel mobile-active" id="chatListPanel">
+              <div class="chat-list-header">
+                <div class="search-input-wrapper">
+                  <i class="las la-search" aria-hidden="true"></i>
+                  <input type="text" id="chatSearchInput" class="search-input" placeholder="Search chats...">
+                </div>
+              </div>
+              <div class="chat-list" id="chatList">
+                </div>
+            </div>
+            <div class="chat-window" id="chatWindow">
+              <div class="chat-window-header">
+                <button class="chat-back-btn" id="chatBackBtn" aria-label="Back to chat list"><i class="las la-arrow-left"></i></button>
+                <div class="chat-window-avatar" id="chatWindowAvatar"></div>
+                <span class="chat-window-name" id="chatWindowName"></span>
+              </div>
+              <div class="chat-messages" id="chatMessages">
+                 <div class="chat-placeholder">
+                    <i class="las la-comment-dots"></i>
+                    <span>Select a chat to start messaging</span>
+                  </div>
+              </div>
+              <div class="chat-input-area disabled" id="chatInputArea">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type a message...">
+                <button class="chat-send-btn" id="chatSendBtn" aria-label="Send message"><i class="las la-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="media-sub-tab hidden" id="mediaGroupsContent">
+          <div class="card">
+            <div class="leaderboard-item loading-placeholder">
+              <i class="las la-users"></i>
+              <span>Groups UI will be built here.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </section>
+
+    <section id="profileTab" class="tab-content" role="tabpanel">
       <div class="card">
         <h3 class="profile-title">Profile</h3>
-        <p>
-          Name:
-          <span id="profileName">Student</span>
-        </p>
-        <p>
-          Roll Number:
-          <span id="profileRollNumber">RollNumber</span>
-        </p>
-        <button
-          id="logoutButton"
-          class="test-btn-primary profile-logout-button"
-          type="button"
-        >
-          Logout
-        </button>
+        <p>Name: <span id="profileName">Student</span></p>
+        <p>Roll Number: <span id="profileRollNumber">RollNumber</span></p>
+        <button id="logoutButton" class="test-btn-primary profile-logout-button" type="button">Logout</button>
       </div>
     </section>
   </main>
 
-  <!-- BOTTOM NAV -->
-  <nav
-    class="bottom-nav"
-    role="tablist"
-    aria-label="Main sections"
-  >
-    <button
-      id="tab-home"
-      class="nav-item active"
-      type="button"
-      role="tab"
-      aria-selected="true"
-      aria-controls="homeTab"
-      data-tab="home"
-    >
-      <i class="las la-home" aria-hidden="true"></i>
-      <span>Home</span>
+  <nav class="bottom-nav" role="tablist" aria-label="Main sections">
+    <button id="tab-home" class="nav-item active" type="button" role="tab" data-tab="home">
+      <i class="las la-home" aria-hidden="true"></i> <span>Home</span>
     </button>
-    <button
-      id="tab-tests"
-      class="nav-item"
-      type="button"
-      role="tab"
-      aria-selected="false"
-      aria-controls="testsTab"
-      data-tab="tests"
-    >
-      <i class="las la-clipboard-list" aria-hidden="true"></i>
-      <span>Tests</span>
+    <button id="tab-tests" class="nav-item" type="button" role="tab" data-tab="tests">
+      <i class="las la-clipboard-list" aria-hidden="true"></i> <span>Tests</span>
     </button>
-    <button
-      id="tab-leaderboard"
-      class="nav-item"
-      type="button"
-      role="tab"
-      aria-selected="false"
-      aria-controls="leaderboardTab"
-      data-tab="leaderboard"
-    >
-      <i class="las la-trophy" aria-hidden="true"></i>
-      <span>Rank</span>
+    <button id="tab-leaderboard" class="nav-item" type="button" role="tab" data-tab="leaderboard">
+      <i class="las la-trophy" aria-hidden="true"></i> <span>Rank</span>
     </button>
-    <button
-      id="tab-media"
-      class="nav-item"
-      type="button"
-      role="tab"
-      aria-selected="false"
-      aria-controls="mediaTab"
-      data-tab="media"
-    >
-      <i class="las la-stream" aria-hidden="true"></i>
-      <span>Media</span>
-    </button>
-    <button
-      id="tab-profile"
-      class="nav-item"
-      type="button"
-      role="tab"
-      aria-selected="false"
-      aria-controls="profileTab"
-      data-tab="profile"
-    >
-      <i class="las la-user" aria-hidden="true"></i>
-      <span>Profile</span>
+    <button id="tab-media" class="nav-item" type="button" role="tab" data-tab="media">
+      <i class="las la-stream" aria-hidden="true"></i> <span>Media</span> </button>
+    <button id="tab-profile" class="nav-item" type="button" role="tab" data-tab="profile">
+      <i class="las la-user" aria-hidden="true"></i> <span>Profile</span>
     </button>
   </nav>
+
+  <div class="story-viewer" id="storyViewer">
+    <div class="story-viewer-content">
+      <div class="story-viewer-header">
+        <div class="story-viewer-avatar" id="storyViewerAvatar"></div>
+        <span class="story-viewer-name" id="storyViewerName"></span>
+      </div>
+      <button class="story-viewer-close" id="storyViewerClose" aria-label="Close story">&times;</button>
+      <img src="" alt="Story content" class="story-viewer-image" id="storyViewerImage">
+    </div>
+  </div>
+
 
   <script>
     "use strict";
 
-    // THEME + SESSION (front-end only; no real auth here)
+    // ----- AUTH & DATA SETUP -----
+
+    // 1. Load Student Data (with fallback for testing)
+    function getStudentData() {
+      const sessionData = sessionStorage.getItem("currentStudent");
+      if (sessionData) {
+        try {
+          return JSON.parse(sessionData);
+        } catch (e) { console.error("Error parsing session data", e); }
+      }
+      // *** FALLBACK FOR TESTING ***
+      console.warn("TEST MODE: No session data found. Using fallback student.");
+      return { 
+        Name: "Test Student", 
+        RollNumber: "23000-TEST-001", 
+        Username: "teststudent" 
+      };
+    }
+
+    const currentStudentObject = getStudentData();
+    
+    // *** FALLBACK FOR TESTING ***
+    let currentSessionId = sessionStorage.getItem("sessionId");
+    if (!currentSessionId) {
+        console.warn("TEST MODE: No session ID found. Using fallback ID.");
+        currentSessionId = "test-session-12345";
+    }
+
+    // 4. Sample Data
+    const SAMPLE_TESTS = {
+      available: [
+        { testId: "EV-OS-UT1", testName: "OS - CPU Scheduling (Unit Test 1)", subject: "Operating Systems", duration: 30, totalQuestions: 20, difficulty: "medium", createdByName: "CME Dept." },
+      ],
+      completed: [
+        { testId: "EV-DBMS-JOINS", testName: "DBMS - Joins & Subqueries", subject: "DBMS", difficulty: "easy", score: 23, totalQuestions: 25, percentage: 92.0, rank: 5, attemptedAt: "2025-11-12T09:45:00Z" },
+      ]
+    };
+    const SAMPLE_LEADERBOARD = [
+      { rank: 1, name: "Priya Sharma", roll: "23022-CS-001", score: 98.5, isPrivate: false, initial: "P" },
+      { rank: 2, name: "Arjun Reddy", roll: "23022-EC-015", score: 95.2, isPrivate: false, initial: "A" },
+      { rank: 3, name: "Sneha Gupta", roll: "23022-CS-005", score: 94.8, isPrivate: true, initial: "S" },
+      { rank: 12, name: currentStudentObject.Name, roll: currentStudentObject.RollNumber, score: 81.4, isSelf: true, initial: (currentStudentObject.Name || "T").charAt(0) },
+    ];
+    const SAMPLE_NOTIFICATIONS = [
+      { id: "n1", type: 'alert', text: 'Reminder: OS - CPU Scheduling test is due tomorrow.', time: '1h ago', icon: 'la-exclamation-triangle' },
+      { id: "n2", type: 'test', text: 'New test assigned: DBMS - Normalization Quiz.', time: '3h ago', icon: 'la-clipboard-list' },
+    ];
+    const SAMPLE_STORIES = [
+        { id: "s1", user: { name: "Priya S.", initial: "P" }, imageUrl: "https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80" },
+        { id: "s2", user: { name: "Arjun R.", initial: "A" }, imageUrl: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80" },
+    ];
+    const SAMPLE_FEED = [
+      {
+        postId: "p1",
+        author: { name: "Priya Sharma", roll: "23022-CS-001", initial: "P" },
+        text: "Just finished the DBMS Joins test, feeling confident! 🚀\nHow did everyone else do?",
+        imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        stats: { likes: 12, comments: 2 },
+        isLiked: false,
+        comments: [
+            { author: { name: "Arjun Reddy", initial: "A" }, text: "Nice! I found Q5 a bit tricky." },
+            { author: { name: "Vikram Singh", initial: "V" }, text: "Same, that subquery was tough." },
+        ]
+      },
+      {
+        postId: "p2",
+        author: { name: "Arjun Reddy", roll: "23022-EC-015", initial: "A" },
+        text: "Found this great diagram for CPU scheduling algorithms. Hope it helps someone!",
+        imageUrl: "https://i.stack.imgur.com/2lW3T.png",
+        stats: { likes: 28, comments: 1 },
+        isLiked: true,
+        comments: [
+            { author: { name: "Test Student", initial: "T" }, text: "This is super helpful, thanks for sharing!" }
+        ]
+      },
+      {
+        postId: "p3",
+        author: { name: "CME Faculty", roll: "Lecturer", initial: "F" },
+        text: "Reminder: The submission deadline for the OS assignment is this Friday. No extensions will be granted.",
+        imageUrl: null,
+        stats: { likes: 5, comments: 0 },
+        isLiked: false,
+        comments: []
+      }
+    ];
+    const SAMPLE_CHATS = {
+      "chat-1": {
+        user: { name: "Priya Sharma", initial: "P" },
+        messages: [
+          { sender: "P", text: "Hey! Did you finish the OS assignment?" },
+          { sender: "me", text: "Not yet, I'm stuck on question 3. 😫" },
+          { sender: "P", text: "Ugh, same! The one about scheduling? It's tough." },
+        ],
+        time: "10:30 AM",
+        unread: 1,
+      },
+      "chat-2": {
+        user: { name: "CME Dept. Group", initial: "G" },
+        messages: [
+          { sender: "F", text: "Reminder: The submission deadline for the OS assignment is this Friday." },
+          { sender: "me", text: "Thanks for the reminder!" },
+        ],
+        time: "Yesterday",
+        unread: 0,
+      },
+      "chat-3": {
+        user: { name: "Arjun Reddy", initial: "A" },
+        messages: [
+          { sender: "A", text: "Found this great diagram for CPU scheduling algorithms. Check it out!" },
+          { sender: "A", text: "[Sent an image]" },
+        ],
+        time: "Tuesday",
+        unread: 0,
+      },
+    };
+
+    // ----- THEME -----
     let isDarkTheme = window.localStorage.getItem("theme") === "dark";
     if (isDarkTheme) {
       document.body.classList.add("dark");
     }
 
-    // SAMPLE STUDENT (replace when connecting login.html)
-    const currentStudentObject = {
-      Name: "RangSwamy",
-      Username: "rswamy",
-      RollNumber: "23022-CM-032"
-    };
-
-    // ===== SAMPLE MOCK TESTS DATA (front-end only) =====
-    const SAMPLE_TESTS = {
-      upcoming: [
-        {
-          testId: "EV-OS-UT1",
-          testName: "OS - CPU Scheduling (Unit Test 1)",
-          subject: "Operating Systems",
-          category: "Semester 3 · CME",
-          duration: 30,
-          totalQuestions: 20,
-          difficulty: "medium",
-          scheduledAt: "2025-11-20T09:30:00Z",
-          createdByName: "CME Dept."
-        },
-        {
-          testId: "EV-DBMS-QUIZ2",
-          testName: "DBMS - Normalization Quiz",
-          subject: "DBMS",
-          category: "Quick Quiz",
-          duration: 15,
-          totalQuestions: 10,
-          difficulty: "easy",
-          scheduledAt: "2025-11-21T17:00:00Z",
-          createdByName: "DBMS Faculty"
-        },
-        {
-          testId: "EV-DSA-PRACTICE1",
-          testName: "DSA - Stacks & Queues (Practice)",
-          subject: "Data Structures through C",
-          category: "Practice Set",
-          duration: 40,
-          totalQuestions: 25,
-          difficulty: "hard",
-          scheduledAt: "2025-11-23T08:00:00Z",
-          createdByName: "CME Dept."
-        }
-      ],
-      completed: [
-        {
-          testId: "EV-OS-PROC",
-          testName: "OS - Process Management",
-          subject: "Operating Systems",
-          difficulty: "medium",
-          score: 18,
-          totalQuestions: 25,
-          percentage: 72.0,
-          rank: 15,
-          attemptedAt: "2025-11-10T10:00:00Z"
-        },
-        {
-          testId: "EV-DBMS-JOINS",
-          testName: "DBMS - Joins & Subqueries",
-          subject: "DBMS",
-          difficulty: "easy",
-          score: 23,
-          totalQuestions: 25,
-          percentage: 92.0,
-          rank: 5,
-          attemptedAt: "2025-11-12T09:45:00Z"
-        },
-        {
-          testId: "EV-DSA-ARRAYS",
-          testName: "DSA - Arrays & Searching",
-          subject: "Data Structures through C",
-          difficulty: "medium",
-          score: 21,
-          totalQuestions: 30,
-          percentage: 70.0,
-          rank: 22,
-          attemptedAt: "2025-11-15T16:00:00Z"
-        }
-      ]
-    };
-
     // ----- HELPERS -----
     function byId(id) {
       return document.getElementById(id);
     }
-
     function formatDateTime(isoString) {
       if (!isoString) return "";
       const d = new Date(isoString);
       return d.toLocaleString(undefined, {
-        day: "2-digit",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit"
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
       });
     }
-
     function difficultyCssClass(testDifficulty) {
-      const normalized = String(testDifficulty || "")
-        .toLowerCase()
-        .trim();
+      const normalized = String(testDifficulty || "").toLowerCase().trim();
       if (normalized === "easy") return "test-difficulty-easy";
       if (normalized === "hard") return "test-difficulty-hard";
       return "test-difficulty-medium";
     }
-
     function debounce(fn, delayMs) {
       let timer;
       return (...args) => {
@@ -1331,782 +1349,927 @@
         timer = setTimeout(() => fn(...args), delayMs);
       };
     }
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
 
     // ----- STATE -----
     let recentScoresChart = null;
     let difficultyDistributionChart = null;
     let subjectPerformanceChart = null;
-
-    let testsDataObject = {
-      upcoming: [...SAMPLE_TESTS.upcoming],
-      completed: [...SAMPLE_TESTS.completed]
-    };
-
+    let testsDataObject = { available: [], completed: [] };
     let currentDifficultyFilter = "all";
+    let hasLoadedLeaderboard = false;
+    let hasLoadedNotifications = false;
+    let hasLoadedMedia = false; 
+    let hasLoadedChat = false;
+    let currentChatId = null;
+    let simulatedImagePath = null; 
 
     // ----- INIT -----
     window.addEventListener("load", initialize);
 
-    function initialize() {
+    async function initialize() {
       setStudentIdentity();
-      initializeChartsWithSamples();
-      initializeEventListeners();
-      loadOverviewFromSamples();
-      loadTestsFromSamples();
-    }
-
-    function setStudentIdentity() {
-      const studentName =
-        currentStudentObject.Name ||
-        currentStudentObject.Username ||
-        currentStudentObject.RollNumber ||
-        "Student";
-      const studentRollNumber =
-        currentStudentObject.RollNumber || "RollNumber";
-      const studentInitial =
-        studentName.charAt(0).toUpperCase() || "S";
-
-      const userNameElement = byId("userName");
-      const userRollElement = byId("userRoll");
-      const userInitialElement = byId("userInitial");
-      const profileNameElement = byId("profileName");
-      const profileRollNumberElement = byId("profileRollNumber");
-
-      if (userNameElement) userNameElement.textContent = studentName;
-      if (userRollElement)
-        userRollElement.textContent = studentRollNumber;
-      if (userInitialElement)
-        userInitialElement.textContent = studentInitial;
-
-      if (profileNameElement)
-        profileNameElement.textContent = studentName;
-      if (profileRollNumberElement)
-        profileRollNumberElement.textContent = studentRollNumber;
-    }
-
-    // ----- THEME + NAV + LOGOUT -----
-    function handleThemeToggleClick() {
-      isDarkTheme = !isDarkTheme;
-      document.body.classList.toggle("dark", isDarkTheme);
-      window.localStorage.setItem(
-        "theme",
-        isDarkTheme ? "dark" : "light"
-      );
-    }
-
-    function handleNotificationClick() {
-      window.alert(
-        "Notification center will show your test reminders and updates here."
-      );
-    }
-
-    function handleLogoutClick() {
-      const isConfirmed = window.confirm(
-        "Are you sure you want to logout?"
-      );
-      if (!isConfirmed) return;
-      window.sessionStorage.clear();
-      window.localStorage.removeItem("studentData");
-      window.location.href = "login.html";
-    }
-
-    function switchTab(tabKey) {
-      document
-        .querySelectorAll(".tab-content")
-        .forEach((el) => el.classList.remove("active"));
-
-      const tabElement = byId(`${tabKey}Tab`);
-      if (tabElement) {
-        tabElement.classList.add("active");
-        tabElement.focus();
+      initializeChartsWithEmptyData();
+      initializeEventListeners(); 
+      const dashboardData = await fetchDashboardData();
+      loadOverviewFromData(dashboardData);
+      const testsData = await fetchTestsData();
+      testsDataObject.available = testsData.available;
+      testsDataObject.completed = testsData.completed;
+      const badge = byId("notificationBadge");
+      if(SAMPLE_NOTIFICATIONS.length > 0) {
+        badge.textContent = SAMPLE_NOTIFICATIONS.length;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
       }
+    }
 
-      const bottomNavItems = document.querySelectorAll(
-        ".bottom-nav .nav-item"
-      );
-      bottomNavItems.forEach((navItem) => {
-        navItem.classList.remove("active");
-        navItem.setAttribute("aria-selected", "false");
-      });
-
-      const tabIndexMap = {
-        home: 0,
-        tests: 1,
-        leaderboard: 2,
-        media: 3,
-        profile: 4
+    // ----- API FETCHING (MOCKS) -----
+    async function fetchDashboardData() {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return {
+        stats: {
+          totalTests: SAMPLE_TESTS.completed.length,
+          percentages: SAMPLE_TESTS.completed.map((t) => t.percentage || 0),
+          rank: 12, streakDays: 3,
+        },
+        recentScores: {
+          labels: SAMPLE_TESTS.completed.map((t) => t.testId),
+          scores: SAMPLE_TESTS.completed.map((t) => t.percentage || 0),
+        },
+        difficultyDistribution: {
+          easy: SAMPLE_TESTS.completed.filter((t) => t.difficulty === "easy").length,
+          medium: SAMPLE_TESTS.completed.filter((t) => t.difficulty === "medium").length,
+          hard: SAMPLE_TESTS.completed.filter((t) => t.difficulty === "hard").length,
+        },
+        subjectPerformance: {
+          labels: ["OS", "DBMS", "DSA", "Networks", "SE"],
+          scores: [78, 92, 70, 0, 0],
+        },
       };
-      const index = tabIndexMap[tabKey];
-      if (index != null && bottomNavItems[index]) {
-        const navItem = bottomNavItems[index];
-        navItem.classList.add("active");
-        navItem.setAttribute("aria-selected", "true");
-      }
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
+    }
+    async function fetchTestsData() {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return {
+        available: [...SAMPLE_TESTS.available],
+        completed: [...SAMPLE_TESTS.completed],
+      };
+    }
+    async function fetchLeaderboardData() {
+      if (hasLoadedLeaderboard) return; 
+      renderLeaderboard(SAMPLE_LEADERBOARD, true); 
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      renderLeaderboard(SAMPLE_LEADERBOARD, false); 
+      hasLoadedLeaderboard = true;
+    }
+    async function fetchNotificationsData() {
+      if (hasLoadedNotifications) return; 
+      const body = byId("notificationsBody");
+      body.innerHTML = `<div class="notification-item empty"><div class="notification-icon"><i class="las la-spinner la-spin"></i></div><div class="notification-content"><span class="notification-text">Loading...</span></div></div>`;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      renderNotifications(SAMPLE_NOTIFICATIONS);
+      hasLoadedNotifications = true;
+    }
+    async function fetchMediaData() {
+      if (hasLoadedMedia) return;
+      const storiesPromise = new Promise((resolve) => setTimeout(resolve, 800));
+      const feedPromise = new Promise((resolve) => setTimeout(resolve, 1200));
+      await storiesPromise;
+      renderStories(SAMPLE_STORIES);
+      await feedPromise;
+      renderMediaFeed(SAMPLE_FEED);
+      hasLoadedMedia = true;
+    }
+    async function fetchChatData() {
+        if (hasLoadedChat) return;
+        await new Promise(resolve => setTimeout(resolve, 500));
+        renderChatList(SAMPLE_CHATS);
+        hasLoadedChat = true;
     }
 
+    // ----- DATA LOADERS (Overview) -----
+    function loadOverviewFromData(data) {
+      const { stats, recentScores, difficultyDistribution, subjectPerformance } = data;
+      const totalTests = stats.totalTests || 0;
+      const percentages = stats.percentages || [];
+      const avgScore = percentages.length ? percentages.reduce((a, b) => a + b, 0) / percentages.length : 0;
+      const bestScore = percentages.length ? Math.max(...percentages) : 0;
+      const accuracy = Math.round(avgScore);
+      const rank = stats.rank || "--";
+      const streakDays = stats.streakDays || 0;
+      byId("statTestsCompleted").textContent = String(totalTests);
+      byId("statAverageScore").textContent = avgScore.toFixed(1);
+      byId("statGlobalRank").textContent = rank;
+      byId("statAnswerAccuracy").textContent = accuracy;
+      byId("miniBestScoreValue").textContent = bestScore.toFixed(1);
+      const lastTestScore = percentages.length > 0 ? percentages[percentages.length - 1] : 0;
+      byId("miniLastTestScore").textContent = lastTestScore.toFixed(1);
+      byId("miniDailyStreak").textContent = `${streakDays} days`;
+      const scoreLabels = recentScores && recentScores.labels.length ? recentScores.labels : ["N/A"];
+      const scoreValues = recentScores && recentScores.scores.length ? recentScores.scores : [0];
+      renderRecentScoresChart(scoreLabels, scoreValues);
+      renderDifficultyDistributionChart(
+        (difficultyDistribution && difficultyDistribution.easy) || 0,
+        (difficultyDistribution && difficultyDistribution.medium) || 0,
+        (difficultyDistribution && difficultyDistribution.hard) || 0
+      );
+      renderSubjectPerformanceChart(
+        (subjectPerformance && subjectPerformance.labels) || ["N/A"],
+        (subjectPerformance && subjectPerformance.scores) || [0]
+      );
+    }
+    
     // ----- EVENT LISTENERS -----
     function initializeEventListeners() {
-      const themeToggleButton = byId("themeToggleButton");
-      const notificationButton = byId("notificationButton");
-      const profileAvatarButton = byId("profileAvatarButton");
-      const logoutButton = byId("logoutButton");
-      const reloadTestsButton = byId("reloadTestsButton");
-      const testSearchInput = byId("testSearchInput");
-
-      if (themeToggleButton) {
-        themeToggleButton.addEventListener(
-          "click",
-          handleThemeToggleClick
-        );
-      }
-
-      if (notificationButton) {
-        notificationButton.addEventListener(
-          "click",
-          handleNotificationClick
-        );
-      }
-
-      if (profileAvatarButton) {
-        profileAvatarButton.addEventListener("click", () =>
-          switchTab("profile")
-        );
-      }
-
-      if (logoutButton) {
-        logoutButton.addEventListener("click", handleLogoutClick);
-      }
-
-      if (reloadTestsButton) {
-        reloadTestsButton.addEventListener("click", loadTestsFromSamples);
-      }
-
-      if (testSearchInput) {
-        const debouncedSearch = debounce(searchTests, 200);
-        testSearchInput.addEventListener("input", debouncedSearch);
-      }
-
-      document
-        .querySelectorAll(".tests-chip[data-filter]")
-        .forEach((buttonElement) => {
+      // Header buttons
+      byId("themeToggleButton").addEventListener("click", handleThemeToggleClick);
+      byId("notificationButton").addEventListener("click", handleNotificationClick);
+      byId("notificationsCloseBtn").addEventListener("click", handleNotificationClick);
+      byId("profileAvatarButton").addEventListener("click", () => switchTab("profile"));
+      byId("logoutButton").addEventListener("click", handleLogoutClick);
+      
+      // Test Tab listeners
+      byId("reloadTestsButton").addEventListener("click", () => { renderTestsLists(); window.alert("Test list refreshed."); });
+      byId("testSearchInput").addEventListener("input", debounce(searchTests, 200));
+      document.querySelectorAll(".tests-chip[data-filter]").forEach((buttonElement) => {
           buttonElement.addEventListener("click", () => {
-            const difficultyKey =
-              buttonElement.getAttribute("data-filter") || "all";
+            const difficultyKey = buttonElement.getAttribute("data-filter") || "all";
             filterByDifficulty(difficultyKey);
           });
         });
 
-      document
-        .querySelectorAll(".bottom-nav .nav-item")
-        .forEach((navItem) => {
+      // Bottom Nav listeners
+      document.querySelectorAll(".bottom-nav .nav-item").forEach((navItem) => {
           navItem.addEventListener("click", () => {
             const tabKey = navItem.getAttribute("data-tab") || "home";
             switchTab(tabKey);
           });
         });
 
-      const upcomingTestsList = byId("upcomingTestsList");
-      const completedTestsList = byId("completedTestsList");
+      // Test list click delegation
+      byId("availableTestsList").addEventListener("click", handleTestsListClick);
+      byId("completedTestsList").addEventListener("click", handleTestsListClick);
+      
+      // Leaderboard listeners
+      byId("leaderboardSearchInput").addEventListener("input", debounce(handleLeaderboardSearch, 300));
+      byId("leaderboardList").addEventListener("click", handleLeaderboardActionClick);
+      byId("compareBtn").addEventListener("click", () => { alert("This will open the profile comparison UI."); });
+      
+      // Media Tab listeners
+      document.querySelectorAll(".media-sub-nav-btn").forEach(btn => {
+        btn.addEventListener("click", handleMediaSubTabClick);
+      });
+      byId("createPostSubmitBtn").addEventListener("click", handleCreatePost);
+      byId("createPostImageBtn").addEventListener("click", showImagePreview);
+      byId("createPostRemoveImageBtn").addEventListener("click", removeImagePreview);
+      byId("feedList").addEventListener("click", handlePostActionClick);
+      byId("storiesBar").addEventListener("click", handleStoryClick); 
+      
+      // Story Viewer Listeners
+      byId("storyViewerClose").addEventListener("click", closeStoryViewer);
+      
+      // Chat Listeners
+      byId("chatList").addEventListener("click", handleChatListClick);
+      byId("chatSendBtn").addEventListener("click", handleSendChatMessage);
+      byId("chatInput").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") handleSendChatMessage();
+      });
+      byId("chatBackBtn").addEventListener("click", showChatList);
+      
+      // Notification click delegation
+      byId("notificationsBody").addEventListener("click", handleNotificationItemClick);
 
-      if (upcomingTestsList) {
-        upcomingTestsList.addEventListener(
-          "click",
-          handleTestsListClick
-        );
-      }
-      if (completedTestsList) {
-        completedTestsList.addEventListener(
-          "click",
-          handleTestsListClick
-        );
+      // Close notification panel if clicking outside
+      document.addEventListener('click', (event) => {
+        const panel = byId('notificationsPanel');
+        const bellButton = byId('notificationButton');
+        if (!panel || !bellButton || !panel.classList.contains('show')) return;
+        if (panel.contains(event.target) || bellButton.contains(event.target)) return;
+        panel.classList.remove('show');
+      });
+    }
+
+    // ----- IDENTITY & NAV -----
+    
+    function setStudentIdentity() {
+      const studentName = currentStudentObject.Name || "Student";
+      const studentRollNumber = currentStudentObject.RollNumber || "RollNumber";
+      const studentInitial = studentName.charAt(0).toUpperCase() || "S";
+      byId("userName").textContent = studentName;
+      byId("userRoll").textContent = studentRollNumber;
+      byId("userInitial").textContent = studentInitial;
+      byId("profileName").textContent = studentName;
+      byId("profileRollNumber").textContent = studentRollNumber;
+      byId("createPostAvatar").textContent = studentInitial;
+      byId("createPostTextarea").placeholder = `What's on your mind, ${studentName}?`;
+    }
+
+    function handleThemeToggleClick() {
+      isDarkTheme = !isDarkTheme;
+      document.body.classList.toggle("dark", isDarkTheme);
+      window.localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
+    }
+
+    function handleNotificationClick() {
+      const panel = byId("notificationsPanel");
+      if (!panel) return;
+      const isVisible = panel.classList.toggle("show");
+      if (isVisible && !hasLoadedNotifications) {
+        fetchNotificationsData();
       }
     }
 
-    // ----- OVERVIEW FROM SAMPLE DATA -----
-    function initializeChartsWithEmptyData() {
-      const defaultLabels = ["Test 1", "Test 2", "Test 3", "Test 4", "Test 5"];
-      const zeroValues = [0, 0, 0, 0, 0];
-
-      renderRecentScoresChart(defaultLabels, zeroValues);
-      renderDifficultyDistributionChart(0, 0, 0);
-      renderSubjectPerformanceChart();
+    function handleLogoutClick() {
+      const isConfirmed = window.confirm("Are you sure you want to logout?");
+      if (!isConfirmed) return;
+      alert("Logout successful! (In test mode)");
     }
 
-    function initializeChartsWithSamples() {
-      initializeChartsWithEmptyData();
-    }
+    function switchTab(tabKey) {
+      document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+      const tabElement = byId(`${tabKey}Tab`);
+      if (tabElement) tabElement.classList.add("active");
 
-    function loadOverviewFromSamples() {
-      const completed = SAMPLE_TESTS.completed;
+      document.querySelectorAll(".bottom-nav .nav-item").forEach((navItem) => {
+          const isActive = navItem.getAttribute("data-tab") === tabKey;
+          navItem.classList.toggle("active", isActive);
+          navItem.setAttribute("aria-selected", isActive.toString());
+        });
 
-      const totalTests = completed.length;
-      const percentages = completed.map((t) => t.percentage || 0);
-      const avgScore =
-        percentages.length
-          ? percentages.reduce((a, b) => a + b, 0) / percentages.length
-          : 0;
-      const bestScore =
-        percentages.length ? Math.max(...percentages) : 0;
-
-      const accuracy = Math.round(avgScore); // simple approx
-      const rank = 12;
-      const streakDays = 3;
-
-      const difficulties = completed.map((t) =>
-        String(t.difficulty || "").toLowerCase().trim()
-      );
-      const distribution = {
-        easy: difficulties.filter((d) => d === "easy").length,
-        medium: difficulties.filter((d) => d === "medium").length,
-        hard: difficulties.filter((d) => d === "hard").length
-      };
-
-      const totalTestsElement = byId("statTestsCompleted");
-      const avgScoreElement = byId("statAverageScore");
-      const rankElement = byId("statGlobalRank");
-      const accuracyElement = byId("statAnswerAccuracy");
-      const bestScoreElement = byId("miniBestScoreValue");
-      const lastTestScoreElement = byId("miniLastTestScore");
-      const streakElement = byId("miniDailyStreak");
-
-      if (totalTestsElement) {
-        totalTestsElement.textContent = String(totalTests);
+      // --- Data loading on-demand ---
+      if (tabKey === 'leaderboard' && !hasLoadedLeaderboard) {
+        fetchLeaderboardData();
       }
-
-      if (avgScoreElement) {
-        avgScoreElement.textContent = avgScore.toFixed(1);
+      if (tabKey === 'tests') {
+        renderTestsLists();
       }
-
-      if (rankElement) {
-        rankElement.textContent = rank;
+      if (tabKey === 'media' && !hasLoadedMedia) {
+        fetchMediaData(); 
+        fetchChatData(); // Load chat data when media tab is clicked
       }
-
-      if (accuracyElement) {
-        accuracyElement.textContent = accuracy;
+      
+      // Handle scrolling
+      if (tabKey === 'media') {
+        document.body.style.overflow = 'hidden';
+        byId('main').style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+        byId('main').style.overflow = 'auto';
       }
-
-      if (bestScoreElement) {
-        bestScoreElement.textContent = bestScore.toFixed(1);
-      }
-
-      const lastTestRecord = completed[completed.length - 1];
-      if (lastTestScoreElement) {
-        if (lastTestRecord && typeof lastTestRecord.percentage === "number") {
-          lastTestScoreElement.textContent =
-            lastTestRecord.percentage.toFixed(1);
-        } else {
-          lastTestScoreElement.textContent = "0";
-        }
-      }
-
-      if (streakElement) {
-        streakElement.textContent = `${streakDays} days`;
-      }
-
-      const labels =
-        completed.length > 0
-          ? completed.map((t) => t.testId)
-          : ["Test 1", "Test 2", "Test 3", "Test 4", "Test 5"];
-      const scores =
-        completed.length > 0
-          ? completed.map((t) => t.percentage || 0)
-          : [0, 0, 0, 0, 0];
-
-      renderRecentScoresChart(labels, scores);
-      renderDifficultyDistributionChart(
-        distribution.easy,
-        distribution.medium,
-        distribution.hard
-      );
-
-      renderSubjectPerformanceChart();
+      
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     // ----- CHART RENDERERS -----
+    function initializeChartsWithEmptyData() {
+      renderRecentScoresChart(["Loading..."], [0]);
+      renderDifficultyDistributionChart(0, 0, 0);
+      renderSubjectPerformanceChart(["Loading..."], [0]);
+    }
     function renderRecentScoresChart(labels, dataPoints) {
       const canvas = byId("recentScoresChartCanvas");
       if (!canvas || !window.Chart) return;
-
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      if (recentScoresChart) {
-        recentScoresChart.destroy();
-      }
-
+      const ctx = canvas.getContext("2d"); if (!ctx) return;
+      if (recentScoresChart) { recentScoresChart.destroy(); }
       recentScoresChart = new window.Chart(ctx, {
         type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Score",
-              data: dataPoints,
-              borderColor: "#1a73e8",
-              backgroundColor: "rgba(26,115,232,0.1)",
-              tension: 0.4,
-              fill: true,
-              pointRadius: 3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              min: 0,
-              max: 100,
-              ticks: {
-                stepSize: 20
-              }
-            }
-          }
-        }
+        data: { labels, datasets: [{ label: "Score", data: dataPoints, borderColor: "#1a73e8", backgroundColor: "rgba(26,115,232,0.1)", tension: 0.4, fill: true, pointRadius: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } } }
       });
     }
-
-    function renderDifficultyDistributionChart(
-      easyCount,
-      mediumCount,
-      hardCount
-    ) {
+    function renderDifficultyDistributionChart(easyCount, mediumCount, hardCount) {
       const canvas = byId("difficultyDistributionChartCanvas");
       if (!canvas || !window.Chart) return;
-
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      if (difficultyDistributionChart) {
-        difficultyDistributionChart.destroy();
-      }
-
+      const ctx = canvas.getContext("2d"); if (!ctx) return;
+      if (difficultyDistributionChart) { difficultyDistributionChart.destroy(); }
       difficultyDistributionChart = new window.Chart(ctx, {
         type: "doughnut",
-        data: {
-          labels: ["Easy", "Medium", "Hard"],
-          datasets: [
-            {
-              data: [easyCount, mediumCount, hardCount],
-              backgroundColor: ["#34c759", "#fbbc05", "#ea4335"]
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: {
-                boxWidth: 14,
-                font: {
-                  size: 11
-                }
-              }
-            }
-          },
-          cutout: "60%"
-        }
+        data: { labels: ["Easy", "Medium", "Hard"], datasets: [{ data: [easyCount, mediumCount, hardCount], backgroundColor: ["#34c759", "#fbbc05", "#ea4335"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { boxWidth: 14, font: { size: 11 } } } }, cutout: "60%" }
       });
     }
-
-    function renderSubjectPerformanceChart() {
+    function renderSubjectPerformanceChart(subjects, values) {
       const canvas = byId("subjectPerformanceChartCanvas");
       if (!canvas || !window.Chart) return;
-
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      if (subjectPerformanceChart) {
-        subjectPerformanceChart.destroy();
-      }
-
-      const subjects = [
-        "OS",
-        "DBMS",
-        "DSA",
-        "Networks",
-        "SE"
-      ];
-      const values = [78, 92, 70, 0, 0]; // sample
-
+      const ctx = canvas.getContext("2d"); if (!ctx) return;
+      if (subjectPerformanceChart) { subjectPerformanceChart.destroy(); }
       subjectPerformanceChart = new window.Chart(ctx, {
         type: "bar",
-        data: {
-          labels: subjects,
-          datasets: [
-            {
-              label: "Score",
-              data: values,
-              backgroundColor: "#1a73e8"
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              min: 0,
-              max: 100,
-              ticks: {
-                stepSize: 20
-              }
-            }
-          }
-        }
+        data: { labels: subjects, datasets: [{ label: "Score", data: values, backgroundColor: "#1a73e8" }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } } }
       });
     }
 
-    // ----- TESTS RENDERING FROM SAMPLE DATA -----
-    function loadTestsFromSamples() {
-      testsDataObject.upcoming = [...SAMPLE_TESTS.upcoming];
-      testsDataObject.completed = [...SAMPLE_TESTS.completed];
-      renderTestsLists();
-    }
-
+    // ----- TESTS RENDERING -----
     function filterTestsByDifficultyOnly(testList) {
       if (currentDifficultyFilter === "all") return testList;
-      return testList.filter((test) => {
-        return (
-          String(test.difficulty || "")
-            .toLowerCase()
-            .trim() === currentDifficultyFilter
-        );
-      });
+      return testList.filter((test) => (String(test.difficulty || "").toLowerCase().trim() === currentDifficultyFilter));
     }
-
     function renderTestsLists() {
-      const upcomingContainer = byId("upcomingTestsList");
+      const availableContainer = byId("availableTestsList"); 
       const completedContainer = byId("completedTestsList");
-      const upcomingEmptyCard = byId("upcomingEmptyStateCard");
+      const availableEmptyCard = byId("availableEmptyStateCard"); 
       const completedEmptyCard = byId("completedEmptyStateCard");
-
-      if (!upcomingContainer || !completedContainer) return;
-
-      upcomingContainer.innerHTML = "";
+      if (!availableContainer || !completedContainer) return;
+      availableContainer.innerHTML = "";
       completedContainer.innerHTML = "";
-
-      const filteredUpcomingTests = filterTestsByDifficultyOnly(
-        testsDataObject.upcoming
-      );
-      const filteredCompletedTests = filterTestsByDifficultyOnly(
-        testsDataObject.completed
-      );
-
-      if (!filteredUpcomingTests.length) {
-        if (upcomingEmptyCard) {
-          upcomingContainer.appendChild(upcomingEmptyCard);
-        }
+      const filteredAvailableTests = filterTestsByDifficultyOnly(testsDataObject.available); 
+      const filteredCompletedTests = filterTestsByDifficultyOnly(testsDataObject.completed);
+      if (!filteredAvailableTests.length) {
+        if (availableEmptyCard) { availableContainer.appendChild(availableEmptyCard.cloneNode(true)); }
       } else {
-        filteredUpcomingTests.forEach((testObject) => {
-          upcomingContainer.appendChild(
-            buildUpcomingTestCard(testObject)
-          );
-        });
+        filteredAvailableTests.forEach((testObject) => { availableContainer.appendChild(buildAvailableTestCard(testObject)); }); 
       }
-
       if (!filteredCompletedTests.length) {
-        if (completedEmptyCard) {
-          completedContainer.appendChild(completedEmptyCard);
-        }
+        if (completedEmptyCard) { completedContainer.appendChild(completedEmptyCard.cloneNode(true)); }
       } else {
-        filteredCompletedTests.forEach((testObject) => {
-          completedContainer.appendChild(
-            buildCompletedTestCard(testObject)
-          );
-        });
+        filteredCompletedTests.forEach((testObject) => { completedContainer.appendChild(buildCompletedTestCard(testObject)); });
       }
-
-      const upcomingSubtitleElement = byId("upcomingSubtitle");
-      const completedSubtitleElement = byId("completedSubtitle");
-
-      if (upcomingSubtitleElement) {
-        upcomingSubtitleElement.textContent = filteredUpcomingTests.length
-          ? `${filteredUpcomingTests.length} tests scheduled`
-          : "Ready to attempt.";
-      }
-
-      if (completedSubtitleElement) {
-        completedSubtitleElement.textContent = filteredCompletedTests.length
-          ? `${filteredCompletedTests.length} tests completed recently`
-          : "Your recent performance.";
-      }
+      byId("availableSubtitle").textContent = filteredAvailableTests.length ? `${filteredAvailableTests.length} tests available` : "Ready to attempt."; 
+      byId("completedSubtitle").textContent = filteredCompletedTests.length ? `${filteredCompletedTests.length} tests completed recently` : "Your recent performance.";
     }
-
-    function buildUpcomingTestCard(testObject) {
+    function buildAvailableTestCard(testObject) { 
       const cardElement = document.createElement("div");
       cardElement.className = "test-card";
       cardElement.dataset.testId = testObject.testId;
-
       const createdBy = testObject.createdByName || "Lecturer";
-
       cardElement.innerHTML = `
-        <div class="test-top-row">
-          <div>
-            <div class="test-title">
-              ${testObject.testName || "Untitled Test"}
-            </div>
-            <div class="test-id">${testObject.testId || ""}</div>
+          <div class="test-top-row">
+            <div><div class="test-title">${testObject.testName || "Untitled Test"}</div><div class="test-id">${testObject.testId || ""}</div></div>
+            <div><button class="test-btn-primary js-start-test" type="button" data-test-id="${testObject.testId || ""}"><i class="las la-arrow-right" aria-hidden="true"></i></button></div>
           </div>
-          <div>
-            <button
-              class="test-btn-primary js-start-test"
-              type="button"
-              data-test-id="${testObject.testId || ""}"
-            >
-              Start Test
-              <i class="las la-arrow-right" aria-hidden="true"></i>
-            </button>
+          <div class="test-meta-row">
+            <span class="test-meta-pill"><i class="las la-book" aria-hidden="true"></i><span>${testObject.subject || "General"}</span></span>
+            <span class="test-meta-pill"><i class="las la-clock" aria-hidden="true"></i><span>${testObject.duration || 0} min</span></span>
+            <span class="test-meta-pill"><i class="las la-list" aria-hidden="true"></i><span>${testObject.totalQuestions || 0} Qs</span></span>
+            ${testObject.scheduledAt ? `<span class="test-meta-pill"><i class="las la-calendar" aria-hidden="true"></i><span>${formatDateTime(testObject.scheduledAt)}</span></span>` : ""}
           </div>
-        </div>
-        <div class="test-meta-row">
-          <span class="test-meta-pill">
-            <i class="las la-book" aria-hidden="true"></i>
-            <span>${testObject.subject || "General"}</span>
-          </span>
-          <span class="test-meta-pill">
-            <i class="las la-clock" aria-hidden="true"></i>
-            <span>${testObject.duration || 0} min</span>
-          </span>
-          <span class="test-meta-pill">
-            <i class="las la-list" aria-hidden="true"></i>
-            <span>${testObject.totalQuestions || 0} questions</span>
-          </span>
-          ${
-            testObject.category
-              ? `
-          <span class="test-meta-pill">
-            <i class="las la-layer-group" aria-hidden="true"></i>
-            <span>${testObject.category}</span>
-          </span>`
-              : ""
-          }
-          ${
-            testObject.scheduledAt
-              ? `
-          <span class="test-meta-pill">
-            <i class="las la-calendar" aria-hidden="true"></i>
-            <span>${formatDateTime(testObject.scheduledAt)}</span>
-          </span>`
-              : ""
-          }
-        </div>
-        <div class="test-bottom-row">
-          <span class="test-difficulty-pill ${difficultyCssClass(
-            testObject.difficulty
-          )}">
-            ${testObject.difficulty || "Medium"}
-          </span>
-          <span style="color: var(--text-muted);">
-            Created by ${createdBy}
-          </span>
-        </div>
-      `;
-
+          <div class="test-bottom-row">
+            <span class="test-difficulty-pill ${difficultyCssClass(testObject.difficulty)}">${testObject.difficulty || "Medium"}</span>
+            <span style="color: var(--text-muted);">By: ${createdBy}</span>
+          </div>`;
       return cardElement;
     }
-
     function buildCompletedTestCard(testObject) {
       const cardElement = document.createElement("div");
       cardElement.className = "test-card";
       cardElement.dataset.testId = testObject.testId;
-
-      const percentage =
-        typeof testObject.percentage === "number"
-          ? testObject.percentage.toFixed(1)
-          : "0.0";
-      const scoreText = `${testObject.score || 0} / ${
-        testObject.totalQuestions || 0
-      }`;
-
+      const percentage = typeof testObject.percentage === "number" ? testObject.percentage.toFixed(1) : "0.0";
+      const scoreText = `${testObject.score || 0} / ${testObject.totalQuestions || 0}`;
       cardElement.innerHTML = `
-        <div class="test-top-row">
-          <div>
-            <div class="test-title">
-              ${testObject.testName || "Completed Test"}
-            </div>
-            <div class="test-id">${testObject.testId || ""}</div>
+          <div class="test-top-row">
+            <div><div class="test-title">${testObject.testName || "Completed Test"}</div><div class="test-id">${testObject.testId || ""}</div></div>
+            <div style="text-align:right;"><div class="test-title" style="color: var(--primary);">${percentage}%</div><div class="test-id">Score ${scoreText}</div></div>
           </div>
-          <div style="text-align:right;">
-            <div class="test-title" style="color: var(--primary);">
-              ${percentage}%
-            </div>
-            <div class="test-id">
-              Score ${scoreText}
-            </div>
+          <div class="test-meta-row">
+            <span class="test-meta-pill"><i class="las la-book" aria-hidden="true"></i><span>${testObject.subject || "General"}</span></span>
+            <span class="test-meta-pill"><i class="las la-trophy" aria-hidden="true"></i><span>Rank ${testObject.rank != null ? testObject.rank : "--"}</span></span>
+            ${testObject.attemptedAt ? `<span class="test-meta-pill"><i class="las la-history" aria-hidden="true"></i><span>${formatDateTime(testObject.attemptedAt)}</span></span>` : ""}
           </div>
-        </div>
-        <div class="test-meta-row">
-          <span class="test-meta-pill">
-            <i class="las la-book" aria-hidden="true"></i>
-            <span>${testObject.subject || "General"}</span>
-          </span>
-          <span class="test-meta-pill">
-            <i class="las la-trophy" aria-hidden="true"></i>
-            <span>Rank ${testObject.rank != null ? testObject.rank : "--"}</span>
-          </span>
-          ${
-            testObject.attemptedAt
-              ? `
-          <span class="test-meta-pill">
-            <i class="las la-history" aria-hidden="true"></i>
-            <span>${formatDateTime(testObject.attemptedAt)}</span>
-          </span>`
-              : ""
-          }
-        </div>
-        <div class="test-bottom-row">
-          <span class="test-difficulty-pill ${difficultyCssClass(
-            testObject.difficulty
-          )}">
-            ${testObject.difficulty || "Medium"}
-          </span>
-          <button
-            class="test-btn-primary js-view-analysis"
-            type="button"
-            data-test-id="${testObject.testId || ""}"
-          >
-            View Analysis
-            <i class="las la-chart-line" aria-hidden="true"></i>
-          </button>
-        </div>
-      `;
-
+          <div class="test-bottom-row">
+            <span class="test-difficulty-pill ${difficultyCssClass(testObject.difficulty)}">${testObject.difficulty || "Medium"}</span>
+            <button class="test-btn-primary js-view-analysis" type="button" data-test-id="${testObject.testId || ""}"><i class="las la-chart-line" aria-hidden="true"></i></button>
+          </div>`;
       return cardElement;
     }
-
     function searchTests() {
       const searchInputElement = byId("testSearchInput");
-      const searchQuery = (searchInputElement?.value || "")
-        .toLowerCase()
-        .trim();
-
-      if (!searchQuery) {
-        renderTestsLists();
-        return;
-      }
-
+      const searchQuery = (searchInputElement?.value || "").toLowerCase().trim();
+      if (!searchQuery) { renderTestsLists(); return; }
       const matchesSearchQuery = (testObject) => {
-        const compositeString = [
-          testObject.testName,
-          testObject.subject,
-          testObject.testId,
-          testObject.category
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+        const compositeString = [testObject.testName, testObject.subject, testObject.testId, testObject.category].filter(Boolean).join(" ").toLowerCase();
         return compositeString.includes(searchQuery);
       };
-
-      const filteredUpcomingTests = filterTestsByDifficultyOnly(
-        testsDataObject.upcoming
-      ).filter(matchesSearchQuery);
-
-      const filteredCompletedTests = filterTestsByDifficultyOnly(
-        testsDataObject.completed
-      ).filter(matchesSearchQuery);
-
-      const upcomingContainer = byId("upcomingTestsList");
+      const filteredAvailableTests = filterTestsByDifficultyOnly(testsDataObject.available).filter(matchesSearchQuery); 
+      const filteredCompletedTests = filterTestsByDifficultyOnly(testsDataObject.completed).filter(matchesSearchQuery);
+      const availableContainer = byId("availableTestsList"); 
       const completedContainer = byId("completedTestsList");
-      const upcomingEmptyCard = byId("upcomingEmptyStateCard");
+      const availableEmptyCard = byId("availableEmptyStateCard"); 
       const completedEmptyCard = byId("completedEmptyStateCard");
-
-      if (!upcomingContainer || !completedContainer) return;
-
-      upcomingContainer.innerHTML = "";
+      if (!availableContainer || !completedContainer) return;
+      availableContainer.innerHTML = "";
       completedContainer.innerHTML = "";
-
-      if (!filteredUpcomingTests.length) {
-        if (upcomingEmptyCard) {
-          upcomingContainer.appendChild(upcomingEmptyCard);
-        }
+      if (!filteredAvailableTests.length) {
+        if (availableEmptyCard) { availableContainer.appendChild(availableEmptyCard.cloneNode(true)); }
       } else {
-        filteredUpcomingTests.forEach((testObject) => {
-          upcomingContainer.appendChild(
-            buildUpcomingTestCard(testObject)
-          );
-        });
+        filteredAvailableTests.forEach((testObject) => { availableContainer.appendChild(buildAvailableTestCard(testObject)); }); 
       }
-
       if (!filteredCompletedTests.length) {
-        if (completedEmptyCard) {
-          completedContainer.appendChild(completedEmptyCard);
-        }
+        if (completedEmptyCard) { completedContainer.appendChild(completedEmptyCard.cloneNode(true)); }
       } else {
-        filteredCompletedTests.forEach((testObject) => {
-          completedContainer.appendChild(
-            buildCompletedTestCard(testObject)
-          );
-        });
+        filteredCompletedTests.forEach((testObject) => { completedContainer.appendChild(buildCompletedTestCard(testObject)); });
       }
     }
-
     function filterByDifficulty(difficultyKey) {
       currentDifficultyFilter = difficultyKey;
-
-      document
-        .querySelectorAll(".tests-chip[data-filter]")
-        .forEach((buttonElement) => {
-          const isActive =
-            buttonElement.getAttribute("data-filter") ===
-            difficultyKey;
-          if (isActive) {
-            buttonElement.classList.add("active");
-          } else {
-            buttonElement.classList.remove("active");
-          }
-        });
-
+      document.querySelectorAll(".tests-chip[data-filter]").forEach((buttonElement) => {
+        const isActive = buttonElement.getAttribute("data-filter") === difficultyKey;
+        buttonElement.classList.toggle("active", isActive);
+      });
       searchTests();
     }
-
     function handleTestsListClick(event) {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-
       const startButton = target.closest(".js-start-test");
-      if (startButton) {
-        const testId = startButton.getAttribute("data-test-id");
-        startTest(testId);
-        return;
-      }
-
+      if (startButton) { startTest(startButton.getAttribute("data-test-id")); return; }
       const viewButton = target.closest(".js-view-analysis");
-      if (viewButton) {
-        const testId = viewButton.getAttribute("data-test-id");
-        viewTestResults(testId);
-      }
+      if (viewButton) { viewTestResults(viewButton.getAttribute("data-test-id")); }
     }
-
     function startTest(testId) {
       if (!testId) return;
-      window.alert(`Starting test ${testId}`);
-      // TODO: redirect to real test-player page
+      window.alert(`This will start test: ${testId}`);
+      // Future: window.location.href = `test-player.html?testId=${testId}`;
     }
-
     function viewTestResults(testId) {
       if (!testId) return;
-      window.alert(`Opening results for ${testId}`);
-      // TODO: redirect to real results/analysis page
+      window.alert(`This will show results for: ${testId}`);
+      // Future: window.location.href = `test-results.html?testId=${testId}`;
     }
+    
+    // ----- LEADERBOARD & NOTIFICATION RENDERERS -----
+    
+    function renderLeaderboard(rankData, isLoading) {
+      const listContainer = byId("leaderboardList");
+      if (!listContainer) return;
+      const searchTerm = byId("leaderboardSearchInput").value.toLowerCase();
+      if (isLoading) {
+        listContainer.innerHTML = `<div class="leaderboard-item loading-placeholder"><i class="las la-spinner la-spin"></i><span>Loading rankings...</span></div>`;
+        return;
+      }
+      let filteredData = rankData;
+      if (searchTerm) {
+          filteredData = rankData.filter(user => 
+              user.name.toLowerCase().includes(searchTerm) || 
+              user.roll.toLowerCase().includes(searchTerm)
+          );
+      }
+      listContainer.innerHTML = ""; 
+      if (!filteredData || filteredData.length === 0) {
+        listContainer.innerHTML = `<div class="leaderboard-item loading-placeholder"><i class="las la-exclamation-circle"></i><span>No users found.</span></div>`;
+        return;
+      }
+      filteredData.forEach(user => {
+        listContainer.appendChild(buildLeaderboardItem(user));
+      });
+    }
+
+    function buildLeaderboardItem(user) {
+      const item = document.createElement("div");
+      let itemClasses = "leaderboard-item";
+      if (user.isSelf) itemClasses += " user-self";
+      if (user.rank === 1) itemClasses += " rank-1";
+      if (user.rank === 2) itemClasses += " rank-2";
+      if (user.rank === 3) itemClasses += " rank-3";
+      item.className = itemClasses;
+      const userInitial = user.initial || (user.name || "U").charAt(0).toUpperCase();
+      let followBtn = `<button class="leaderboard-btn follow js-leaderboard-follow" data-user-roll="${user.roll}"><i class="las la-user-plus"></i> Follow</button>`;
+      if (user.isPrivate) {
+        followBtn = `<button class="leaderboard-btn requested js-leaderboard-follow" data-user-roll="${user.roll}"><i class="las la-clock"></i> Requested</button>`;
+      }
+      if (user.isSelf) { followBtn = ''; }
+      const privateBadge = user.isPrivate ? '<span class="leaderboard-private-badge">Private</span>' : '';
+      item.innerHTML = `
+        <span class="leaderboard-rank">${user.rank || "--"}</span>
+        <div class="leaderboard-avatar">${userInitial}</div>
+        <div class="leaderboard-details">
+          <span class="leaderboard-name">${user.name || "Unknown"} ${privateBadge} ${user.isSelf ? '(You)' : ''}</span>
+          <span class="leaderboard-roll">${user.roll || "---"}</span>
+        </div>
+        <div class="leaderboard-score-wrapper">
+          <span class="leaderboard-score">${(user.score || 0).toFixed(1)}</span>
+          <div class="leaderboard-score-label">Avg. Score</div>
+        </div>
+        <div class="leaderboard-actions">
+          ${followBtn}
+          <button class="leaderboard-btn js-leaderboard-message" data-user-name="${user.name}" data-chat-id="chat-${user.initial.toLowerCase()}">
+            <i class="las la-comment"></i>
+          </button>
+          <button class="leaderboard-btn js-leaderboard-profile" data-user-name="${user.name}">
+            <i class="las la-user"></i>
+          </button>
+        </div>
+      `;
+      if (user.isSelf) {
+        item.querySelector('.leaderboard-actions').style.display = 'none';
+      }
+      return item;
+    }
+
+    function renderNotifications(notificationData) {
+      const body = byId("notificationsBody");
+      if (!body) return;
+      body.innerHTML = ""; 
+      if (!notificationData || notificationData.length === 0) {
+        body.innerHTML = `<div class="notification-item empty"><div class="notification-icon"><i class="las la-bell-slash"></i></div><div class="notification-content"><span class="notification-text">No new notifications.</span></div></div>`;
+        byId("notificationBadge").style.display = 'none';
+        return;
+      }
+      byId("notificationBadge").textContent = notificationData.length;
+      byId("notificationBadge").style.display = 'flex';
+      notificationData.forEach(notif => {
+        body.appendChild(buildNotificationItem(notif));
+      });
+    }
+
+    function buildNotificationItem(notif) {
+      const item = document.createElement("div");
+      item.className = `notification-item type-${notif.type || 'test'}`;
+      item.dataset.notifId = notif.id; 
+      item.innerHTML = `
+        <div class="notification-icon"><i class="las ${notif.icon || 'la-info-circle'}"></i></div>
+        <div class="notification-content">
+          <span class="notification-text">${notif.text || 'New notification'}</span>
+          <span class="notification-time">${notif.time || 'Just now'}</span>
+        </div>`;
+      return item;
+    }
+
+    // ----- MEDIA TAB FUNCTIONS -----
+
+    function renderStories(storiesData) {
+        const storiesBar = byId("storiesBar");
+        if (!storiesBar) return;
+        storiesBar.innerHTML = ""; 
+        storiesBar.appendChild(buildStoryItem({ id: 'self', user: { name: "Your Story", initial: "+" } }, true));
+        if (storiesData && storiesData.length > 0) {
+            storiesData.forEach(story => {
+                storiesBar.appendChild(buildStoryItem(story, false));
+            });
+        }
+    }
+    
+    function buildStoryItem(story, isSelf) {
+        const item = document.createElement("div");
+        item.className = "story-item";
+        item.dataset.storyId = story.id;
+        const wrapperClass = isSelf ? "story-avatar-wrapper self" : "story-avatar-wrapper";
+        const avatarClass = isSelf ? "story-avatar self-icon" : "story-avatar";
+        item.innerHTML = `
+            <div class="${wrapperClass}">
+                <div class="${avatarClass}">${story.user.initial}</div>
+            </div>
+            <span class="story-name">${story.user.name}</span>`;
+        return item;
+    }
+    
+    function handleStoryClick(event) {
+        const storyItem = event.target.closest('.story-item');
+        if (!storyItem) return;
+        const storyId = storyItem.dataset.storyId;
+        if (storyId === 'self') {
+            alert("This will open the 'Create Story' UI.");
+            return;
+        }
+        const storyData = SAMPLE_STORIES.find(s => s.id === storyId);
+        if (!storyData) return;
+        byId("storyViewerAvatar").textContent = storyData.user.initial;
+        byId("storyViewerName").textContent = storyData.user.name;
+        byId("storyViewerImage").src = storyData.imageUrl;
+        byId("storyViewer").classList.add("show");
+    }
+    
+    function closeStoryViewer() {
+        const viewer = byId("storyViewer");
+        viewer.classList.remove("show");
+        setTimeout(() => {
+            byId("storyViewerImage").src = "";
+            byId("storyViewerAvatar").textContent = "";
+            byId("storyViewerName").textContent = "";
+        }, 300);
+    }
+
+    function renderMediaFeed(feedData) {
+      const feedList = byId("feedList");
+      const loadingPlaceholder = byId("feedLoadingPlaceholder");
+      if (!feedList) return;
+      if (loadingPlaceholder) loadingPlaceholder.remove();
+      feedList.innerHTML = ""; 
+      if (!feedData || feedData.length === 0) {
+        feedList.innerHTML = `<div class="card"><div class="leaderboard-item loading-placeholder"><i class="las la-camera"></i><span>No media posts yet. Be the first!</span></div></div>`;
+        return;
+      }
+      feedData.forEach(post => {
+        feedList.appendChild(buildPostCard(post));
+      });
+    }
+
+    function buildPostCard(post) {
+      const postCard = document.createElement("div");
+      postCard.className = "card";
+      postCard.dataset.postId = post.postId;
+      const user = post.author;
+      const likeClass = post.isLiked ? 'liked' : '';
+      const likeIcon = post.isLiked ? 'las la-thumbs-up' : 'lar la-thumbs-up';
+      const imageHtml = post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-content-image">` : '';
+      let commentsHtml = '';
+      if (post.comments && post.comments.length > 0) {
+        commentsHtml = post.comments.map(comment => `
+          <div class="post-comment-item">
+            <div class="comment-avatar">${comment.author.initial}</div>
+            <div class="comment-text"><span class="comment-name">${comment.author.name}</span> <span>${escapeHTML(comment.text)}</span></div>
+          </div>`).join('');
+      }
+      postCard.innerHTML = `
+        <div class="post-header">
+          <div class="post-avatar">${user.initial || 'U'}</div>
+          <div class="post-user-info">
+            <div class="post-user-name">${user.name || 'Unknown User'}</div>
+            <div class="post-user-roll">${user.roll || '---'}</div>
+          </div>
+          <button class="post-menu-btn" aria-label="Post options"><i class="las la-ellipsis-h"></i></button>
+        </div>
+        <div class="post-content-text">${escapeHTML(post.text || '')}</div>
+        ${imageHtml}
+        <div class="post-stats">
+          <span id="likes-count-${post.postId}">${post.stats.likes || 0} Likes</span>
+          <span>${post.stats.comments || 0} Comments</span>
+        </div>
+        <div class="post-actions">
+          <button class="post-action-btn js-like-btn ${likeClass}" data-post-id="${post.postId}"><i class="${likeIcon}"></i> Like</button>
+          <button class="post-action-btn js-comment-btn" data-post-id="${post.postId}"><i class="lar la-comment"></i> Comment</button>
+          <button class="post-action-btn js-share-btn" data-post-id="${post.postId}"><i class="las la-share"></i> Share</button>
+        </div>
+        <div class="post-comments-container hidden">
+          <div class="post-comment-list">${commentsHtml}</div>
+          <div class="post-comment-input-wrapper">
+            <input type="text" class="post-comment-input" placeholder="Add a comment...">
+            <button class="post-comment-submit-btn js-add-comment-btn">Post</button>
+          </div>
+        </div>`;
+      return postCard;
+    }
+
+    async function handleCreatePost() {
+      const textarea = byId("createPostTextarea");
+      const button = byId("createPostSubmitBtn");
+      const text = textarea.value.trim();
+      if (!text && !simulatedImagePath) {
+        alert("Please write something or add an image to post.");
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Posting...";
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const newPost = {
+        postId: `p${Math.floor(Math.random() * 1000)}`,
+        author: { 
+          name: currentStudentObject.Name, 
+          roll: currentStudentObject.RollNumber, 
+          initial: (currentStudentObject.Name || "S").charAt(0).toUpperCase()
+        },
+        text: text,
+        imageUrl: simulatedImagePath, 
+        stats: { likes: 0, comments: 0 },
+        isLiked: false,
+        comments: []
+      };
+      const feedList = byId("feedList");
+      const noPostsCard = feedList.querySelector('.leaderboard-item');
+      if (noPostsCard) {
+        feedList.innerHTML = "";
+      }
+      feedList.prepend(buildPostCard(newPost));
+      textarea.value = "";
+      removeImagePreview();
+      button.disabled = false;
+      button.textContent = "Post";
+    }
+
+    function handlePostActionClick(event) {
+      const target = event.target;
+      const likeButton = target.closest('.js-like-btn');
+      const commentButton = target.closest('.js-comment-btn');
+      const shareButton = target.closest('.js-share-btn');
+      const addCommentButton = target.closest('.js-add-comment-btn');
+      if (likeButton) {
+        const postId = likeButton.closest('.card').dataset.postId;
+        toggleLike(likeButton, postId);
+        return;
+      }
+      if (commentButton) {
+        const postCard = commentButton.closest('.card');
+        const commentsContainer = postCard.querySelector('.post-comments-container');
+        commentsContainer.classList.toggle('hidden');
+        if (!commentsContainer.classList.contains('hidden')) {
+            postCard.querySelector('.post-comment-input').focus();
+        }
+        return;
+      }
+      if (shareButton) {
+        const postId = shareButton.closest('.card').dataset.postId;
+        alert(`This will open the share dialog for post: ${postId}`);
+        return;
+      }
+      if (addCommentButton) {
+          const postCard = addCommentButton.closest('.card');
+          const commentInput = postCard.querySelector('.post-comment-input');
+          if (commentInput.value.trim()) {
+            addComment(postCard, commentInput.value);
+            commentInput.value = "";
+          }
+      }
+    }
+    
+    function addComment(postCard, text) {
+        const commentList = postCard.querySelector('.post-comment-list');
+        const newComment = document.createElement('div');
+        newComment.className = 'post-comment-item';
+        const safeText = escapeHTML(text);
+        newComment.innerHTML = `
+            <div class="comment-avatar">${currentStudentObject.Name.charAt(0).toUpperCase()}</div>
+            <div class="comment-text">
+              <span class="comment-name">${currentStudentObject.Name}</span>
+              <span>${safeText}</span>
+            </div>
+        `;
+        commentList.appendChild(newComment);
+        
+        // Update comment count
+        const statsEl = postCard.querySelector('.post-stats span:last-child');
+        let count = parseInt(statsEl.textContent, 10) + 1;
+        statsEl.textContent = `${count} Comments`;
+    }
+
+    function toggleLike(button, postId) {
+      const isLiked = button.classList.toggle('liked');
+      const icon = button.querySelector('i');
+      const likesCountEl = byId(`likes-count-${postId}`);
+      let currentLikes = parseInt(likesCountEl.textContent, 10);
+      if (isLiked) {
+        icon.className = 'las la-thumbs-up';
+        likesCountEl.textContent = `${currentLikes + 1} Likes`;
+      } else {
+        icon.className = 'lar la-thumbs-up';
+        likesCountEl.textContent = `${currentLikes - 1} Likes`;
+      }
+    }
+    
+    function showImagePreview() {
+        simulatedImagePath = "https://images.unsplash.com/photo-1550745165-9bc0b252726c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80"; // Sample image
+        byId("createPostPreviewImg").src = simulatedImagePath;
+        byId("createPostPreviewContainer").classList.remove('hidden');
+    }
+    
+    function removeImagePreview() {
+        simulatedImagePath = null;
+        byId("createPostPreviewImg").src = "";
+        byId("createPostPreviewContainer").classList.add('hidden');
+    }
+    
+    // ----- CHAT FUNCTIONS (NEW) -----
+    
+    function renderChatList(chatData) {
+        const listEl = byId("chatList");
+        if (!listEl) return;
+        listEl.innerHTML = ""; // Clear
+        
+        Object.keys(chatData).forEach(chatId => {
+            const chat = chatData[chatId];
+            const item = document.createElement("div");
+            item.className = "chat-list-item";
+            item.dataset.chatId = chatId;
+            const lastMessage = chat.messages[chat.messages.length - 1];
+            item.innerHTML = `
+                <div class="chat-list-avatar">${chat.user.initial}</div>
+                <div class="chat-list-info">
+                    <div class="chat-list-top">
+                        <span class="chat-list-name">${chat.user.name}</span>
+                        <span class="chat-list-time">${chat.time}</span>
+                    </div>
+                    <div class="chat-list-preview">
+                        <span>${escapeHTML(lastMessage.text)}</span>
+                        ${chat.unread > 0 ? `<span class="badge">${chat.unread}</span>` : ''}
+                    </div>
+                </div>
+            `;
+            listEl.appendChild(item);
+        });
+    }
+
+    function handleChatListClick(event) {
+        const chatItem = event.target.closest('.chat-list-item');
+        if (!chatItem) return;
+        const chatId = chatItem.dataset.chatId;
+        currentChatId = chatId; 
+        
+        document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
+        chatItem.classList.add('active');
+        
+        const chat = SAMPLE_CHATS[chatId];
+        byId("chatWindowAvatar").textContent = chat.user.initial;
+        byId("chatWindowName").textContent = chat.user.name;
+        
+        const messagesEl = byId("chatMessages");
+        messagesEl.innerHTML = ""; // Clear placeholder
+        chat.messages.forEach(msg => {
+            renderMessage(msg.sender, msg.text);
+        });
+        messagesEl.scrollTop = messagesEl.scrollHeight; 
+        
+        byId("chatInputArea").classList.remove("disabled");
+        
+        byId('chatListPanel').classList.remove('mobile-active');
+        byId('chatWindow').classList.add('mobile-active');
+    }
+    
+    function renderMessage(sender, text) {
+        const messagesEl = byId("chatMessages");
+        const msg = document.createElement("div");
+        msg.className = (sender === 'me') ? 'chat-message message-sent' : 'chat-message message-received';
+        msg.textContent = escapeHTML(text);
+        messagesEl.appendChild(msg);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    
+    function handleSendChatMessage() {
+        const input = byId("chatInput");
+        const text = input.value.trim();
+        if (!text || !currentChatId) return;
+        SAMPLE_CHATS[currentChatId].messages.push({ sender: 'me', text: text });
+        renderMessage('me', text);
+        input.value = "";
+    }
+    
+    function showChatList() {
+        byId('chatListPanel').classList.add('mobile-active');
+        byId('chatWindow').classList.remove('mobile-active');
+        currentChatId = null;
+        document.querySelectorAll('.chat-list-item').forEach(item => item.classList.remove('active'));
+    }
+
+    // ----- OTHER HANDLERS -----
+
+    function handleNotificationItemClick(event) {
+        const item = event.target.closest('.notification-item');
+        if (!item || item.classList.contains('empty')) return;
+        const notifId = item.dataset.notifId;
+        alert(`This will handle the click for notification: ${notifId}`);
+        handleNotificationClick(); // Close panel after click
+    }
+    
+    function handleLeaderboardSearch() {
+        renderLeaderboard(SAMPLE_LEADERBOARD, false);
+    }
+    
+    function handleLeaderboardActionClick(event) {
+        const target = event.target;
+        const followBtn = target.closest('.js-leaderboard-follow');
+        const messageBtn = target.closest('.js-leaderboard-message');
+        const profileBtn = target.closest('.js-leaderboard-profile');
+
+        if (followBtn) {
+            const roll = followBtn.dataset.userRoll;
+            if (followBtn.classList.contains('requested')) {
+                alert(`Follow request already sent to ${roll}`);
+            } else {
+                alert(`Sending follow request to ${roll}`);
+                followBtn.classList.add('requested');
+                followBtn.innerHTML = '<i class="las la-clock"></i> Requested';
+            }
+            return;
+        }
+        if (messageBtn) {
+            const name = messageBtn.dataset.userName;
+            alert(`This will open a chat with ${name}`);
+            switchTab('media'); // Go to media tab
+            // Programmatically click the 'Messages' sub-tab
+            document.querySelector('.media-sub-nav-btn[data-subtab="messages"]').click();
+            return;
+        }
+        if (profileBtn) {
+            const name = profileBtn.dataset.userName;
+            alert(`This will open the profile page for ${name}`);
+            return;
+        }
+    }
+    
+    function handleMediaSubTabClick(event) {
+        const clickedBtn = event.target.closest('.media-sub-nav-btn');
+        if (!clickedBtn) return;
+        
+        const subtab = clickedBtn.dataset.subtab;
+
+        // Handle button active state
+        document.querySelectorAll('.media-sub-nav-btn').forEach(btn => btn.classList.remove('active'));
+        clickedBtn.classList.add('active');
+
+        // Handle content visibility
+        document.querySelectorAll('.media-sub-tab').forEach(tab => tab.classList.add('hidden'));
+        if (subtab === 'feed') {
+            byId('mediaFeedContent').classList.remove('hidden');
+        } else if (subtab === 'messages') {
+            byId('mediaMessagesContent').classList.remove('hidden');
+        } else if (subtab === 'groups') {
+            byId('mediaGroupsContent').classList.remove('hidden');
+        }
+    }
+
   </script>
 </body>
 </html>
